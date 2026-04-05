@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-*xv@2s!ip-i#uh_xc^oj2rk^rilcgt&xdcypv)2wr$mnhovbus
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["tercerconcurso2026.onrender.com"]
 
 
 # Application definition
