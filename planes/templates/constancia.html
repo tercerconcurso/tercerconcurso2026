@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 16px;
+        }
+        .encabezado {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="encabezado">
+    <h1>CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO</h1>
+    <p>Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos</p>
+    <p>Región de Los Ríos – Código BIP 40013271-0 – Tercer Concurso 2026</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>N°</th>
+            <th>Nombre</th>
+            <th>RUT</th>
+            <th>Comuna</th>
+            <th>Sector</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for plan in planes %}
+        <tr>
+            <td>{{ plan.numero }}</td>
+            <td>{{ plan.nombre_agricultor }}</td>
+            <td>{{ plan.rut_agricultor }}</td>
+            <td>{{ plan.comuna }}</td>
+            <td>{{ plan.sector }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <img src="file:///{{ STATIC_ROOT }}/images/seremi.png" width="120">
+    <img src="file:///{{ STATIC_ROOT }}/images/gore.png" width="120">
+</div>
+</html>

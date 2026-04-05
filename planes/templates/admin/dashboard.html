@@ -1,0 +1,46 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>📊 Dashboard Concurso</h1>
+
+<h2>Montos</h2>
+<ul>
+    <li>Total ingresado: {{ total }}</li>
+    <li>Aprobados: {{ aprobados }}</li>
+    <li>Rechazados técnicos: {{ rechazados_tec }}</li>
+    <li>Rechazados administrativos: {{ rechazados_admin }}</li>
+</ul>
+
+<h2>Planes por comuna</h2>
+<ul>
+{% for c in por_comuna %}
+    <li>{{ c.comuna }}: {{ c.total }}</li>
+{% endfor %}
+</ul>
+
+<h2>Planes por operador</h2>
+<ul>
+    {% for o in por_operador %}
+        <li>{{ o.nombre_operador }}: {{ o.total }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Planes por tipo de concurso</h2>
+<ul>
+    {% for item in por_concurso %}
+        <li>{{ item.concurso }}: {{ item.total }}</li>
+    {% empty %}
+        <li>No hay datos</li>
+    {% endfor %}
+</ul>
+
+<h2>Planes por tipo de práctica</h2>
+<ul>
+    {% for item in por_practica %}
+        <li>{{ item.tipo }}: {{ item.total }}</li>
+    {% empty %}
+        <li>No hay datos</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

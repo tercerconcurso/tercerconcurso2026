@@ -1,0 +1,224 @@
+/* =========================
+   HEADER ADMIN (ESTILO INSTITUCIONAL)
+========================= */
+
+#header {
+    background: #ffffff !important;
+    border-bottom: 4px solid #2f5d73;
+    color: #2f5d73 !important;
+}
+
+/* título (lado izquierdo) */
+#header h1,
+#header h1 a {
+    color: #2f5d73 !important;
+}
+
+/* links y usuario (lado derecho) */
+#header a,
+#user-tools {
+    color: #2f5d73 !important;
+}
+
+/* hover links */
+#header a:hover {
+    color: #1f3c88 !important;
+}
+
+/* logos */
+#header img {
+    background: transparent;
+}
+
+
+/* =========================
+   BLOQUES (MÓDULOS)
+========================= */
+
+.module {
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* títulos de módulos */
+.module h2 {
+    background: #2f5d73 !important;
+    color: white !important;
+}
+
+
+/* =========================
+   BOTONES
+========================= */
+
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input {
+    background: #1f3c88 !important;
+    color: white !important;
+    border: none;
+}
+
+/* =========================
+   LAYOUT HEADER PROFESIONAL
+========================= */
+
+
+
+/* contenedor izquierdo (logos + título) */
+#header h1 {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* logos */
+#header img {
+    height: 40px;
+    width: auto;
+}
+
+/* bloque usuario derecha */
+#user-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+}
+
+/* =========================
+   HEADER TIPO INSTITUCIONAL REAL
+========================= */
+
+#header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+/* IZQUIERDA: logos */
+#header h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+/* CENTRO: texto institucional */
+#header h1 span,
+#header h1 div {
+    text-align: center;
+    width: 100%;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+/* DERECHA: usuario */
+#user-tools {
+    justify-self: end;
+    text-align: right;
+}
+
+/* =========================
+   ESTRUCTURA REAL DEL HEADER
+========================= */
+
+/* contenedor principal */
+#header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* bloque izquierdo (branding real) */
+#branding {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+/* título + texto institucional */
+#branding h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 14px;
+    width: 100%;
+}
+
+/* centrado del texto */
+#branding h1 div,
+#branding h1 span {
+    text-align: center;
+    width: 100%;
+}
+
+/* usuario derecha */
+#user-tools {
+    white-space: nowrap;
+}
+
+/* =========================
+   AJUSTE FINO HEADER
+========================= */
+
+/* reducir altura general */
+#header {
+    padding: 6px 15px !important;
+}
+
+/* logos más proporcionados */
+#header img {
+    height: 35px !important;
+}
+
+/* centrar mejor el bloque de texto */
+#branding {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* texto principal */
+#branding h1 {
+    text-align: center;
+    font-size: 13px !important;
+    line-height: 1.2;
+    margin: 0;
+}
+
+/* subtítulo */
+#branding h1 div {
+    font-size: 11px !important;
+}
+
+/* usuario más compacto */
+#user-tools {
+    font-size: 11px;
+}
+
+/* OCULTAR HEADER ORIGINAL DJANGO */
+#header {
+    display: none !important;
+}
+
+/* Botón PDF */
+.boton-pdf {
+    background-color: #2f6f7e;
+    color: white !important;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.boton-pdf:hover {
+    background-color: #245863;
+    color: white;
+}

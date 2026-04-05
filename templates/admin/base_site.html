@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block branding %}
+
+<div id="branding" style="display:flex; align-items:center; width:100%;">
+
+    <!-- IZQUIERDA: LOGOS -->
+    <div style="display:flex; align-items:center; gap:10px;">
+        <img src="{% static 'images/seremi.png' %}" style="height:35px;">
+        <img src="{% static 'images/gore.png' %}" style="height:35px;">
+    </div>
+
+    <!-- CENTRO: TEXTO (SEPARADO DEL H1) -->
+    <div style="flex:1; text-align:center; color:white;">
+        <div style="font-size:13px; font-weight:500;">
+            Programa Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos Región de Los Ríos
+        </div>
+        <div style="font-size:11px;">
+            SEREMI de Agricultura • Región de Los Ríos • BIP: 40013271-0
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
