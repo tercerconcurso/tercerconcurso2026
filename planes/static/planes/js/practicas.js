@@ -3,18 +3,20 @@ function actualizarCampos(form) {
     const tipoField = form.querySelector('select[name$="-tipo"]');
     if (!tipoField) return;
 
-    const valor = tipoField.value;
+    const valor = tipoField.options[tipoField.selectedIndex].text.toLowerCase();
 
-    const filaEnmienda = form.querySelector('[class*="field-subtipo_enmienda"]');
-    const filaCubierta = form.querySelector('[class*="field-subtipo_cubierta"]');
+    const campoEnmienda = form.querySelector('select[name$="-subtipo_enmienda"]');
+    const filaEnmienda = campoEnmienda ? campoEnmienda.closest('.form-row') || campoEnmienda.closest('.form-group') : null;
+    const campoCubierta = form.querySelector('select[name$="-subtipo_cubierta"]');
+    const filaCubierta = campoCubierta ? campoCubierta.closest('.form-row') || campoCubierta.closest('.form-group') : null;
     const inputInicial = form.querySelector('input[name$="-nivel_inicial"]');
     const filaInicial = inputInicial ? inputInicial.closest('.field-box') || inputInicial.parentElement : null;
     const inputFinal = form.querySelector('input[name$="-nivel_final"]');
     const filaFinal = inputFinal ? inputFinal.closest('.field-box') || inputFinal.parentElement : null;
     const inputAluminio = form.querySelector('input[name$="-saturacion_aluminio"]');
-    const ficonst filaAluminio = inputAluminio ? inputAluminio.closest('.field-box') || inputAluminio.parentElement : null;
+    const filaAluminio = inputAluminio ? inputAluminio.closest('.field-box') || inputAluminio.parentElement : null;
 
-    // 🔥 OCULTAR TODO
+    // 🔥 OCULTAR TODO SIEMPRE AL INICIO
     if (filaEnmienda) filaEnmienda.style.display = 'none';
     if (filaCubierta) filaCubierta.style.display = 'none';
     if (filaInicial) filaInicial.style.display = 'none';
@@ -22,31 +24,34 @@ function actualizarCampos(form) {
     if (filaAluminio) filaAluminio.style.display = 'none';
     
     // 🔹 FÓSFORO
-    if (valor === 'fosforo') {
+    if (valor.includes('fosfor')) {
         if (filaInicial) filaInicial.style.display = '';
         if (filaFinal) filaFinal.style.display = '';
     }
 
     // 🔹 ENMIENDA
-if (valor === 'enmienda') {
+    if (valor.includes('químicos') || valor.includes('enmienda')) {
 
-    if (filaEnmienda) filaEnmienda.style.display = '';
-    if (filaFinal) filaFinal.style.display = '';
+        if (filaEnmienda) filaEnmienda.style.display = '';
 
-    const subtipoField = form.querySelector('select[name$="-subtipo_enmienda"]');
-    const subtipo = subtipoField ? subtipoField.value : null;
+        const subtipoField = form.querySelector('select[name$="-subtipo_enmienda"]');
 
-    // 👉 CAL
-    if (subtipo === 'cal') {
-        if (filaInicial) filaInicial.style.display = 'none';
-        if (filaAluminio) filaAluminio.style.display = '';
+        if (subtipoField && subtipoField.value) {
+
+            const subtipo = subtipoField.value;
+
+            if (subtipo === 'cal') {
+                if (filaAluminio) filaAluminio.style.display = '';
+                if (filaFinal) filaFinal.style.display = '';
+            }
+
+            else if (subtipo === 'potasio' || subtipo === 'azufre') {
+                if (filaInicial) filaInicial.style.display = '';
+                if (filaFinal) filaFinal.style.display = '';
+            }
+        }
     }
 
-    // 👉 POTASIO / AZUFRE
-    else if (subtipo === 'potasio' || subtipo === 'azufre') {
-        if (filaInicial) filaInicial.style.display = '';
-        if (filaAluminio) filaAluminio.style.display = 'none';
-    }
 
     // 👉 SIN SELECCIÓN
     else {
@@ -55,10 +60,9 @@ if (valor === 'enmienda') {
     }
     }
     // 🔹 PRADERA
-    if (valor === 'cubierta') {
+    if (valor.includes('cubierta'))
         if (filaCubierta) filaCubierta.style.display = '';
-    }
-    }
+    
 
     // 🔥 CONTROL FINAL (FORZADO)
     const subtipoField = form.querySelector('select[name$="-subtipo_enmienda"]');
@@ -77,19 +81,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const tipoField = form.querySelector('select[name$="-tipo"]');
         if (!tipoField) return;
 
-        const subtipoField = form.querySelector('select[name$="-subtipo_enmienda"]');
-
-        tipoField.addEventListener('change', function () {
-            actualizarCampos(form);
+        form.addEventListener('change', function (e) {
+            if (e.target && e.target.name && e.target.name.includes('subtipo_enmienda')) {
+                setTimeout(function() {
+                    actualizarCampos(form);
+                }, 0);
+            }
         });
 
-        if (subtipoField) {
-            subtipoField.addEventListener('change', function () {
-                actualizarCampos(form);
-            });
-        }
-
-        actualizarCampos(form);
+        setTimeout(function() {
+            actualizarCampos(form);
+        }, 100);
     }
 
     // 🔥 FORMULARIOS EXISTENTES (FIX REAL)

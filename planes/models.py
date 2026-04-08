@@ -65,8 +65,27 @@ class Plan(models.Model):
     def __str__(self):
         return f"{self.numero} - {self.nombre_agricultor}"
     
+    def save(self, *args, **kwargs):
+
+        if self.comuna:
+            self.comuna = self.comuna.strip().upper()
+
+        if self.nombre_operador:
+            self.nombre_operador = self.nombre_operador.strip().upper()
+
+        if self.concurso:
+            self.concurso = self.concurso.strip().upper()
+
+        if self.sector:
+            self.sector = self.sector.strip().upper()
+
+        super().save(*args, **kwargs)
+    
 class ResumenPlan(models.Model):
-    plan = models.OneToOneField(Plan, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+
+    incentivo_practicas = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
+    incentivo_total = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
 
     tipo_postulacion = models.CharField(max_length=100, null=True, blank=True)
     correo = models.EmailField(null=True, blank=True)
@@ -84,7 +103,7 @@ class ResumenPlan(models.Model):
         return self.plan.nombre_agricultor
 
     @property
-
+    
     def rut_agricultor(self):
         return self.plan.rut_agricultor
 
@@ -153,29 +172,7 @@ class ResumenPlan(models.Model):
             self.costo_asesoria
         )
     
-    @property
-    def incentivo_practicas(self):
-        potrero = self.plan.potreros.first()
-
-        if not potrero or not potrero.porcentaje_incentivo:
-            return 0
-
-        porcentaje = potrero.porcentaje_incentivo / 100
-
-        costo_neto_total = sum([
-            p.costo_neto or 0 for p in self.plan.potreros.all()
-        ])
-
-        return costo_neto_total * porcentaje
     
-    @property
-    def incentivo_total(self):
-        return (
-            self.incentivo_practicas +
-            self.costo_analisis +
-            self.costo_asesoria
-        )
-
     @property
     def estado_tecnico(self):
         ev = getattr(self.plan, 'evaluaciontecnica', None)
@@ -211,27 +208,47 @@ class ResumenPlan(models.Model):
     @property
     def motivo_reconsideracion(self):
         return self.plan.motivo_reconsideracion
+    
+    def save(self, *args, **kwargs):
+
+        # 🔹 obtener porcentaje desde el PRIMER potrero
+        potrero = self.plan.potreros.first()
+
+        if potrero and potrero.porcentaje_incentivo:
+            porcentaje = float(potrero.porcentaje_incentivo) / 100
+        else:
+            porcentaje = 0
+
+        # 🔹 costo neto total
+        costo_neto_total = sum([
+            float(p.costo_neto or 0)
+            for p in self.plan.potreros.all()
+        ])
+
+        # 🔥 incentivo prácticas
+        incentivo_practicas = costo_neto_total * porcentaje
+
+        # 🔹 costos adicionales
+        costo_analisis = sum([
+            float(p.costo_analisis_suelo or 0)
+            for p in self.plan.potreros.all()
+        ])
+
+        costo_asesoria = sum([
+            float(p.asesoria_plan or 0)
+            for p in self.plan.potreros.all()
+        ])
+
+        # 🔥 guardar en BD
+        self.incentivo_practicas = incentivo_practicas
+        self.incentivo_total = float(incentivo_practicas) + float(costo_analisis) + float(costo_asesoria)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Resumen {self.plan.numero}"
     
-    from django.db.models.signals import post_save
-    from django.dispatch import receiver
-
-    @receiver(post_save, sender=Plan)
-    def crear_resumen(sender, instance, created, **kwargs):
-        if created:
-            ResumenPlan.objects.create(
-                plan=instance,
-                correo="",  # luego lo puedes mejorar
-                telefono="",
-                rol_avaluo="",
-                tenencia="",
-                superficie_total=0,
-                coordenada_norte=0,
-                coordenada_este=0
-                
-            )
+   
 class Potrero(models.Model):
     plan = models.ForeignKey(
         'Plan',
@@ -491,15 +508,16 @@ class PracticaPotrero(models.Model):
                 raise ValidationError("Debe seleccionar si es siembra o regeneración")
 
     def __str__(self):
-        return f"{self.tipo} - {self.potrero}"       
+        return f"{self.tipo} - {self.potrero}"     
+
+    
 
 class EvaluacionTecnica(models.Model):
 
     ESTADO_TECNICO = [
-        ('aprobado', 'Aprobado'),
-        ('rechazado', 'Rechazado'),
+        ('APROBADO', 'Aprobado'),
+        ('RECHAZADO', 'Rechazado'),
     ]
-
     plan = models.OneToOneField(Plan, on_delete=models.CASCADE)
 
     estado_tecnico = models.CharField(
@@ -606,7 +624,7 @@ class EvaluacionTecnica(models.Model):
         for potrero in self.plan.potreros.all():
             for practica in potrero.practicas.all():
 
-                if practica.tipo == 'fosforo' and practica.nivel_inicial is not None:
+                if (practica.tipo or "").lower() == 'fosforo' and practica.nivel_inicial is not None:
                     niveles.append(practica.nivel_inicial)
 
         if not niveles:
@@ -626,8 +644,8 @@ class EvaluacionTecnica(models.Model):
             for practica in potrero.practicas.all():
 
                 if (
-                    practica.tipo == 'enmienda' and
-                    practica.subtipo_enmienda == 'potasio' and
+                    (practica.tipo or "").lower() == 'enmienda' and
+                    (practica.subtipo_enmienda or "").lower() == 'potasio' and
                     practica.nivel_inicial
                 ):
 
@@ -646,8 +664,8 @@ class EvaluacionTecnica(models.Model):
             for practica in potrero.practicas.all():
 
                 if (
-                    practica.tipo == 'enmienda' and
-                    practica.subtipo_enmienda == 'azufre' and
+                    (practica.tipo or "").lower() == 'enmienda' and
+                    (practica.subtipo_enmienda or "").lower() == 'azufre' and
                     practica.nivel_inicial
                 ):
 
@@ -665,11 +683,10 @@ class EvaluacionTecnica(models.Model):
             for practica in potrero.practicas.all():
 
                 if (
-                    practica.tipo == 'enmienda' and
-                    practica.subtipo_enmienda == 'cal' and
+                    (practica.tipo or "").lower() == 'enmienda' and
+                    (practica.subtipo_enmienda or "").lower() == 'cal' and
                     practica.resultado
                 ):
-
                     mejora = practica.resultado  # ↓ aluminio
 
                     for limite, puntaje in self.TRAMOS_CAL:
@@ -686,7 +703,7 @@ class EvaluacionTecnica(models.Model):
         for potrero in self.plan.potreros.all():
             for practica in potrero.practicas.all():
 
-                if practica.tipo == 'cubierta':
+                if (practica.tipo or "").lower() == 'cubierta':
                     superficie_total += potrero.superficie or 0
 
         if superficie_total == 0:
@@ -731,14 +748,13 @@ class EvaluacionTecnica(models.Model):
 
     def save(self, *args, **kwargs):
 
+        # 🔥 calcular puntaje antes de guardar
         self.puntaje = self.calcular_puntaje()
 
         super().save(*args, **kwargs)
-          
-
-    def __str__(self):
-        return f"Evaluación técnica - Plan {self.plan.numero}"   
-    
+        def __str__(self):
+            return f"Evaluación técnica - Plan {self.plan.numero}"   
+        
 
 class HistorialPostulacion(models.Model):
     rut = models.CharField(max_length=12)

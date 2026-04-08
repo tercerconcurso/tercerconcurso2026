@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+
+{% load humanize %}
+
+{% block content %}
+
+<h1 style="margin-bottom:20px;">📊 Dashboard Concurso</h1>
+
+<hr>
+
+<!-- 🔹 MONTOS -->
+<div>
+<h2>💰 Montos</h2>
+<ul>
+    <li>Total ingresado: ${{ montos.total|intcomma}}</li>
+    <li>Aprobados: ${{ montos.aprobados|intcomma }}</li>
+    <li>Rechazados técnicos: ${{ montos.rechazados_tecnicos|intcomma }}</li>
+    <li>Rechazados administrativos: ${{ montos.rechazados_admin|intcomma}}</li>
+</ul>
+</div>
+
+<!-- 🔹 COMUNA -->
+<div>
+<h2>📍 Planes por comuna</h2>
+<ul>
+    {% for comuna, cantidad in por_comuna.items %}
+        <li>{{ comuna }}: {{ cantidad }}</li>
+    {% endfor %}
+</ul>
+</div>
+
+<!-- 🔹 OPERADOR -->
+<div>
+<h2>👤 Planes por operador</h2>
+<ul>
+    {% for operador, cantidad in por_operador.items %}
+        <li>{{ operador }}: {{ cantidad }}</li>
+    {% endfor %}
+</ul>
+</div>
+
+<!-- 🔹 CONCURSO -->
+<div>
+<h2>📂 Planes por tipo de concurso</h2>
+<ul>
+    {% for tipo, cantidad in conteo_concurso.items %}
+        <li>{{ tipo|title }}: {{ cantidad }}</li>
+    {% endfor %}
+</ul>
+</div>
+
+<!-- 🔹 PRÁCTICAS -->
+<div>
+<h2>🌱 Planes por tipo de práctica</h2>
+<ul>
+    {% for tipo, cantidad in planes_por_practica.items %}
+        <li>{{ tipo }}: {{ cantidad }}</li>
+    {% endfor %}
+</ul>
+</div>
+
+{% endblock %}

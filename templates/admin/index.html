@@ -1,115 +1,22 @@
 {% extends "admin/base_site.html" %}
 
-{% load humanize %}
-
 {% block content %}
 
-<h1 style="margin-bottom:20px;">📊 Dashboard Concurso</h1>
+<h1>Bienvenida</h1>
 
-<style>
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin-bottom: 25px;
-}
+<p>Panel de administración.</p>
 
-.card {
-    border-radius: 10px;
-    padding: 18px;
-    color: white;
-    font-weight: 500;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.card h3 {
-    margin: 0;
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.card p {
-    margin: 5px 0 0;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.card.azul { background: #2f6f7e; }
-.card.verde { background: #4CAF50; }
-.card.rojo { background: #f44336; }
-.card.naranjo { background: #ff9800; }
-
-.seccion {
-    margin-top: 25px;
-}
-
-.seccion h2 {
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 5px;
-    font-size: 18px;
-}
-
-ul {
-    margin-top: 10px;
-}
-
-ul li {
-    margin-bottom: 4px;
-    font-size: 14px;
-}
-</style>
-
-<hr>
-
-<!-- 🔹 MONTOS -->
-<div class="seccion">
-<h2>💰 Montos</h2>
-<ul>
-    <li>Total ingresado: ${{ montos.total|intcomma}}</li>
-    <li>Aprobados: ${{ montos.aprobados|intcomma }}</li>
-    <li>Rechazados técnicos: ${{ montos.rechazados_tecnicos|intcomma }}</li>
-    <li>Rechazados administrativos: ${{ montos.rechazados_admin|intcomma}}</li>
-</ul>
-</div>
-
-<!-- 🔹 COMUNA -->
-<div class="seccion">
-<h2>📍 Planes por comuna</h2>
-<ul>
-    {% for comuna, cantidad in por_comuna.items %}
-        <li>{{ comuna }}: {{ cantidad }}</li>
-    {% endfor %}
-</ul>
-</div>
-
-<!-- 🔹 OPERADOR -->
-<div class="seccion">
-<h2>👤 Planes por operador</h2>
-<ul>
-    {% for operador, cantidad in por_operador.items %}
-        <li>{{ operador }}: {{ cantidad }}</li>
-    {% endfor %}
-</ul>
-</div>
-
-<!-- 🔹 CONCURSO -->
-<div class="seccion">
-<h2>📂 Planes por tipo de concurso</h2>
-<ul>
-    {% for tipo, cantidad in conteo_concurso.items %}
-        <li>{{ tipo|title }}: {{ cantidad }}</li>
-    {% endfor %}
-</ul>
-</div>
-
-<!-- 🔹 PRÁCTICAS -->
-<div class="seccion">
-<h2>🌱 Planes por tipo de práctica</h2>
-<ul>
-    {% for tipo, cantidad in planes_por_practica.items %}
-        <li>{{ tipo }}: {{ cantidad }}</li>
-    {% endfor %}
-</ul>
+<div style="margin-top: 20px;">
+    <a href="/admin/dashboard/" style="
+        background:#2f6f7e;
+        color:white;
+        padding:10px 15px;
+        border-radius:6px;
+        text-decoration:none;
+        font-weight:500;
+    ">
+        📊 Ir al Dashboard
+    </a>
 </div>
 
 {% endblock %}

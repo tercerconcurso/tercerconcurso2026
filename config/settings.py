@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-*xv@2s!ip-i#uh_xc^oj2rk^rilcgt&xdcypv)2wr$mnhovbus
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["tercerconcurso2026.onrender.com"]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'planes',
+    'planes.apps.PlanesConfig',
     'django.contrib.humanize',
 ]
 
@@ -81,11 +81,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.parse('postgresql://tercerconcurso_db_user:kddABlF9Nlsk0wn5K0U9ilUREKmK1dk7@dpg-d79ad0shg0os73e48n3g-a.oregon-postgres.render.com/tercerconcurso_db')
 }
 
 # Password validation
@@ -136,3 +135,15 @@ STATIC_URL = '/static/'
 import os
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+if not User.objects.filter(username="admin").exists():
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@mail.com",
+        password="admin123"
+    )

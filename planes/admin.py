@@ -15,6 +15,7 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 import openpyxl
 import csv
+from pyproj import Transformer
 
 
 # ======================
@@ -323,11 +324,11 @@ def dashboard_view(request):
     ])
 
     # AGRUPACIONES
-    por_comuna = Plan.objects.values('comuna').annotate(
+    por_comuna = Plan.objects.exclude(comuna__isnull=True).exclude(comuna='').values('comuna').annotate(
         total=Count('numero', distinct=True)
     ).order_by('-total')
 
-    por_operador = Plan.objects.values('nombre_operador').annotate(
+    por_operador = Plan.objects.exclude(nombre_operador__isnull=True).exclude(nombre_operador='').values('nombre_operador').annotate(
         total=Count('numero', distinct=True)
     ).order_by('-total')
 
@@ -337,7 +338,9 @@ def dashboard_view(request):
         for p in planes
     ]
 
-    conteo_concurso = Counter(concursos)
+    conteo_concurso = Counter([
+        c for c in concursos if c
+    ])
     print("DEBUG CONCURSO:", conteo_concurso)
 
     montos = {
@@ -368,7 +371,7 @@ def dashboard_view(request):
             'rechazados_admin': rechazados_admin,
         }
     }
-    return render(request, 'admin/index.html', context)
+    return render(request, 'admin/dashboard.html', context)
 
 
 # ======================
@@ -377,8 +380,56 @@ def dashboard_view(request):
 class ResumenPlanInline(admin.StackedInline):
     model = ResumenPlan
     extra = 0
+    max_num = 1
+    can_delete = False
 
+    def has_add_permission(self, request, obj=None):
+        if obj and ResumenPlan.objects.filter(plan=obj).exists():
+            return False
+        return True
+    
+    def ver_mapa(self, obj):
+        if obj and obj.coordenada_norte and obj.coordenada_este and obj.huso:
 
+            try:
+                norte = float(str(obj.coordenada_norte).replace(",", "."))
+                este = float(str(obj.coordenada_este).replace(",", "."))
+
+                transformer = Transformer.from_crs(
+                    f"EPSG:327{int(obj.huso)}",
+                    "EPSG:4326",
+                    always_xy=True
+                )
+
+                lon, lat = transformer.transform(este, norte)
+
+                url = f"https://www.google.com/maps?q={lat},{lon}"
+
+                return format_html(
+                    '<a target="_blank" href="{}">📍 Ver en Maps</a>', url
+                )
+
+            except Exception:
+                return "Error en coordenadas"
+
+        return "Guardar para ver mapa"
+
+    ver_mapa.short_description = "Mapa"
+    readonly_fields = ('ver_mapa',)
+    fields = (
+            'correo',
+            'telefono',
+
+            'rol_avaluo',
+            'tenencia',
+
+            'superficie_total',
+
+            'coordenada_norte',
+            'coordenada_este',
+            'huso',
+            'ver_mapa',  
+    )        
 # ======================
 # INLINE POTRERO
 # ======================
@@ -398,6 +449,45 @@ class PotreroInline(admin.StackedInline):
         return "-"
     ir_a_potrero.short_description = "Editar prácticas"
 
+    def ver_mapa(self, obj):
+        if obj and obj.utm_norte and obj.utm_este and obj.huso:
+
+            try:
+                norte = float(str(obj.utm_norte).replace(",", "."))
+                este = float(str(obj.utm_este).replace(",", "."))
+
+                transformer = Transformer.from_crs(
+                    f"EPSG:327{int(obj.huso)}",
+                    "EPSG:4326",
+                    always_xy=True
+                )
+
+                lon, lat = transformer.transform(este, norte)
+
+                url = f"https://www.google.com/maps?q={lat},{lon}"
+
+                return format_html(
+                    '<a target="_blank" href="{}">📍 Ver en Maps</a>', url
+                )
+
+            except Exception as e:
+                return f"Error: {e}"
+
+        return "Guardar para ver mapa"
+
+    ver_mapa.short_description = "Mapa"
+    readonly_fields = ('ir_a_potrero', 'ver_mapa')
+    fields = (
+        'nombre',
+        'superficie',
+
+        'utm_norte',
+        'utm_este',
+        'huso',
+        'ver_mapa',
+
+        'ir_a_potrero',
+)
 
 # ======================
 # FORM PRACTICA DINAMICO
@@ -412,20 +502,20 @@ class PracticaPotreroForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # ocultar todo primero
+        self.fields['subtipo_enmienda'].widget = forms.Select(
+            choices=self.fields['subtipo_enmienda'].choices
+        )
+        self.fields['subtipo_cubierta'].widget = forms.Select(
+            choices=self.fields['subtipo_cubierta'].choices
+        )
+        self.fields['saturacion_aluminio'].widget = forms.NumberInput()
+        # 🔥 IMPORTANTE: asegurar que nivel_inicial SIEMPRE exista
+        self.fields['nivel_inicial'].widget = forms.NumberInput()
+        
+        tipo = self.data.get('tipo') or getattr(self.instance, 'tipo', None)
 
-        def clean(self):
-            cleaned_data = super().clean()
-
-            tipo = cleaned_data.get('tipo')
-            subtipo = cleaned_data.get('subtipo_enmienda')
-
-        tipo = None
-
-        if self.instance and self.instance.pk:
-            tipo = self.instance.tipo
-        else:
-            tipo = self.data.get('tipo')
-            if tipo and (
+        if tipo and (
                 'enmienda' in str(tipo).lower() or
                 'incorporacion' in str(tipo).lower()
             ):
@@ -456,12 +546,7 @@ class PracticaPotreroForm(forms.ModelForm):
                     self.fields['nivel_inicial'].required = True
                     self.fields['nivel_inicial'].widget = forms.NumberInput()
 
-        # ocultar todo primero
-        self.fields['subtipo_enmienda'].widget = forms.HiddenInput()
-        self.fields['subtipo_cubierta'].widget = forms.HiddenInput()
-        self.fields['saturacion_aluminio'].widget = forms.HiddenInput()
-        # 🔥 IMPORTANTE: asegurar que nivel_inicial SIEMPRE exista
-        self.fields['nivel_inicial'].widget = forms.NumberInput()
+        
 
         # lógica por tipo
         if tipo and (
@@ -483,7 +568,10 @@ class PracticaPotreroForm(forms.ModelForm):
             
             
         elif tipo == 'cubierta':
-            self.fields['subtipo_cubierta'].widget = forms.Select()
+            self.fields['subtipo_cubierta'].widget = forms.Select(
+                choices=self.fields['subtipo_cubierta'].choices
+            )
+            self.fields['subtipo_cubierta'].required = True
 
         elif tipo == 'fosforo':
             pass  # solo niveles
@@ -545,13 +633,32 @@ class PlanAdmin(admin.ModelAdmin):
         'rut_agricultor',
         'comuna',
         'nombre_operador',
-        'estado_admin_display',
-        'estado_tecnico',
+        'estado_admin_formateado',
+        'estado_tecnico_formateado',
         'puntaje_tecnico',
-        'incentivo_total',
+        'incentivo_total_display',
         'boton_constancia',
     )
 
+    def incentivo_total(self, obj):
+        from .models import ResumenPlan
+
+        resumen = ResumenPlan.objects.filter(plan=obj).first()
+
+        if resumen and resumen.incentivo_total:
+            return int(resumen.incentivo_total)
+
+        return "-"
+    def incentivo_total_display(self, obj):
+        from .models import ResumenPlan
+
+        resumen = ResumenPlan.objects.filter(plan=obj).first()
+
+        if resumen and resumen.incentivo_total:
+            return int(resumen.incentivo_total)
+
+        return "-"
+    incentivo_total_display.short_description = "INCENTIVO $"
     # 🔍 BUSCADOR (NUEVO)
     search_fields = (
         'numero',
@@ -577,6 +684,22 @@ class PlanAdmin(admin.ModelAdmin):
 
     # ⚡ PERFORMANCE (NUEVO)
     list_select_related = ('evaluaciontecnica',)
+
+    def estado_tecnico_formateado(self, obj):
+        ev = getattr(obj, 'evaluaciontecnica', None)
+        if not ev or not ev.estado_tecnico:
+            return "-"
+        return ev.estado_tecnico.upper()
+
+    estado_tecnico_formateado.short_description = "Estado técnico"
+
+
+    def estado_admin_formateado(self, obj):
+        if not obj.estado_administrativo:
+            return "-"
+        return obj.estado_administrativo.upper()
+
+    estado_admin_formateado.short_description = "Estado admin"
 
     # ======================
     # ACCIONES
@@ -613,23 +736,30 @@ class PlanAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.order_by('-fecha_ingreso')
+        return qs.order_by('-fecha_ingreso', '-evaluaciontecnica__puntaje')
     
     # ======================
     # RANKING
     # ======================
     def ranking_posicion(self, obj):
-        if not hasattr(self, '_ranking_cache'):
-            queryset = list(self.get_queryset(None))
-            self._ranking_cache = {
-                plan.pk: index + 1
-                for index, plan in enumerate(queryset)
-            }
+        try:
+            cl = self.get_changelist_instance(self.request)
+            queryset = list(cl.result_list)
 
-        return self._ranking_cache.get(obj.pk)
+            for index, plan in enumerate(queryset):
+                if plan.pk == obj.pk:
+                    return index + 1
 
-    ranking_posicion.short_description = "Ranking"
+        except Exception as e:
+            return "-"
 
+        return "-"
+    
+    def changelist_view(self, request, extra_context=None):
+        self.request = request
+        return super().changelist_view(request, extra_context)
+    
+    ordering = ('-evaluaciontecnica__puntaje', '-fecha_ingreso')
     # ======================
     # EXPORTAR CSV
     # ======================
@@ -675,6 +805,17 @@ class PlanAdmin(admin.ModelAdmin):
     
     incentivo_total.short_description = "Incentivo $"
 
+    
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+
+        plan = form.instance
+
+        from .models import ResumenPlan
+
+        resumen, _ = ResumenPlan.objects.get_or_create(plan=plan)
+        resumen.save()
+
 # ======================
 # ADMIN RESUMEN
 # ======================
@@ -682,6 +823,7 @@ class PlanAdmin(admin.ModelAdmin):
 class ResumenPlanAdmin(admin.ModelAdmin):
     exclude = ('tipo_postulacion',)
     readonly_fields = (
+        'ver_mapa',
         'nombres_potreros',
         'superficie_potreros',
         'costo_practicas',
@@ -710,9 +852,10 @@ class ResumenPlanAdmin(admin.ModelAdmin):
         'superficie_total',
         'superficie_potreros',
 
-        'coordenada_norte',
         'coordenada_este',
+        'coordenada_norte',
         'huso',
+        'ver_mapa', 
 
         'nombres_potreros',
 
@@ -735,7 +878,39 @@ class ResumenPlanAdmin(admin.ModelAdmin):
 
         'puntaje_tecnico', 
     )
-    
+    from pyproj import Transformer
+
+    from pyproj import Transformer
+
+    def ver_mapa(self, obj):
+        if obj and obj.coordenada_norte and obj.coordenada_este and obj.huso:
+
+            try:
+                # 🔥 corregir formato (coma → punto)
+                norte = float(str(obj.coordenada_norte).replace(",", "."))
+                este = float(str(obj.coordenada_este).replace(",", "."))
+
+                transformer = Transformer.from_crs(
+                    f"EPSG:327{int(obj.huso)}",
+                    "EPSG:4326",
+                    always_xy=True
+                )
+
+                lon, lat = transformer.transform(este, norte)
+
+                url = f"https://www.google.com/maps?q={lat},{lon}"
+
+                return format_html(
+                    '<a target="_blank" href="{}">📍 Ver en Maps</a>', url
+                )
+
+            except Exception as e:
+                return f"Error: {e}"
+
+        return "Sin coordenadas"
+
+    ver_mapa.short_description = "Mapa"
+   
 
     list_display = ('plan', 'nombres_potreros')
 
@@ -750,6 +925,7 @@ class PotreroAdmin(admin.ModelAdmin):
 admin.site.site_header = "Programa Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos Región de Los Ríos"
 admin.site.site_title = "SEREMI de Agricultura - Región de Los Ríos"
 admin.site.index_title = "Tercer Concurso • 2026"
+admin.site.site_url = "/admin/dashboard/"
 
 from django.contrib.admin import AdminSite
 from django.db.models import Sum, Count
@@ -855,6 +1031,3 @@ def get_admin_urls():
 
 original_get_urls = admin.site.get_urls
 admin.site.get_urls = get_admin_urls
-
-
-
