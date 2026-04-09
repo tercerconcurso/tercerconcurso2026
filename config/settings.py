@@ -90,6 +90,13 @@ if dj_database_url:
     DATABASES = {
         'default': dj_database_url.parse('postgresql://tercerconcurso_db_user:kddABlF9Nlsk0wn5K0U9ilUREKmK1dk7@dpg-d79ad0shg0os73e48n3g-a.oregon-postgres.render.com/tercerconcurso_db')
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
