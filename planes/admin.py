@@ -111,7 +111,12 @@ def exportar_excel(modeladmin, request, queryset):
     ranking = list(modeladmin.get_queryset(request))
 
     for index, plan in enumerate(ranking, start=1):
-        resumen = getattr(plan, 'resumenplan', None)
+        resumen = ResumenPlan.objects.filter(plan=plan).first()
+
+        if not resumen:
+            print(f"⚠️ Plan {plan.numero} sin resumen")
+
+        print(f"Plan {plan.numero} - resumen:", resumen)
 
         ws.append([
             index,
@@ -124,36 +129,36 @@ def exportar_excel(modeladmin, request, queryset):
             plan.comuna,
             plan.sector,
 
-            resumen.rol_avaluo if resumen else '',
-            resumen.tenencia if resumen else '',
-            resumen.superficie_total if resumen else '',
-            resumen.superficie_potreros if resumen else '',
+            getattr(resumen, 'rol_avaluo', '') if resumen else '',
+            getattr(resumen, 'tenencia', '') if resumen else '',
+            getattr(resumen, 'superficie_total', '') if resumen else '',
+            getattr(resumen, 'superficie_potreros', '') if resumen else '',
 
-            resumen.coordenada_norte if resumen else '',
-            resumen.coordenada_este if resumen else '',
-            resumen.huso if resumen else '',
+            getattr(resumen, 'coordenada_norte', '') if resumen else '',
+            getattr(resumen, 'coordenada_este', '') if resumen else '',
+            getattr(resumen, 'huso', '') if resumen else '',
 
-            resumen.detalle_potreros if resumen else '',
+            ", ".join([p.nombre for p in plan.potreros.all()]),
 
-            resumen.costo_practicas if resumen else '',
-            resumen.costo_analisis if resumen else '',
-            resumen.costo_asesoria if resumen else '',
-            resumen.costo_total_real if resumen else '',
+            getattr(resumen, 'costo_practicas', 0) if resumen else 0,
+            getattr(resumen, 'costo_analisis', 0) if resumen else 0,
+            getattr(resumen, 'costo_asesoria', 0) if resumen else 0,
+            getattr(resumen, 'costo_total_real', 0) if resumen else 0,
 
-            resumen.incentivo_practicas if resumen else '',
-            resumen.incentivo_total if resumen else '',
+            getattr(resumen, 'incentivo_practicas', 0) if resumen else 0,
+            getattr(resumen, 'incentivo_total', 0) if resumen else 0,
 
-            resumen.puntaje_tecnico if resumen else '',
+            getattr(resumen, 'puntaje_tecnico', 0) if resumen else 0,
             obtener_estado_final(resumen),
 
-            resumen.estado_administrativo if resumen else '',
-            resumen.motivo_rechazo_admin if resumen else '',
+            getattr(resumen, 'estado_administrativo', '') if resumen else '',
+            getattr(resumen, 'motivo_rechazo_admin', '') if resumen else '',
 
-            resumen.estado_tecnico if resumen else '',
-            resumen.motivo_rechazo_tecnico if resumen else '',
+            getattr(resumen, 'estado_tecnico', '') if resumen else '',
+            getattr(resumen, 'motivo_rechazo_tecnico', '') if resumen else '',
 
-            resumen.estado_reconsideracion if resumen else '',
-            resumen.motivo_reconsideracion if resumen else '',
+            getattr(resumen, 'estado_reconsideracion', '') if resumen else '',
+            getattr(resumen, 'motivo_reconsideracion', '') if resumen else '',
         ])
 
 
@@ -182,7 +187,7 @@ def exportar_excel(modeladmin, request, queryset):
     ws2.append(headers2)
 
     for plan in ranking:
-        resumen = getattr(plan, 'resumenplan', None)
+        resumen = ResumenPlan.objects.filter(plan=plan).first()
 
         for potrero in plan.potreros.all():
 

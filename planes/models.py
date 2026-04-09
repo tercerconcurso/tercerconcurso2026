@@ -82,7 +82,7 @@ class Plan(models.Model):
         super().save(*args, **kwargs)
     
 class ResumenPlan(models.Model):
-    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    plan = models.OneToOneField(Plan, on_delete=models.CASCADE)
 
     incentivo_practicas = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     incentivo_total = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
