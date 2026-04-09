@@ -86,9 +86,10 @@ try:
 except ImportError:
     dj_database_url = None
 
-DATABASES = {
-    'default': dj_database_url.parse('postgresql://tercerconcurso_db_user:kddABlF9Nlsk0wn5K0U9ilUREKmK1dk7@dpg-d79ad0shg0os73e48n3g-a.oregon-postgres.render.com/tercerconcurso_db')
-}
+if dj_database_url:
+    DATABASES = {
+        'default': dj_database_url.parse('postgresql://tercerconcurso_db_user:kddABlF9Nlsk0wn5K0U9ilUREKmK1dk7@dpg-d79ad0shg0os73e48n3g-a.oregon-postgres.render.com/tercerconcurso_db')
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
