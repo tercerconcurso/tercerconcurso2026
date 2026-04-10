@@ -70,6 +70,7 @@ def exportar_excel(modeladmin, request, queryset):
 
         'Estado reconsideracion',
         'Motivo reconsideracion',
+        'Participación',
     ]
 
     ws.append(headers)
@@ -118,6 +119,20 @@ def exportar_excel(modeladmin, request, queryset):
 
         print(f"Plan {plan.numero} - resumen:", resumen)
 
+        from planes.models import HistorialPostulacion
+
+        rut = str(plan.rut_agricultor).replace(".", "").strip()
+        historial = HistorialPostulacion.objects.filter(rut__iexact=rut).first()
+
+        veces = historial.veces if historial else 0
+
+        if veces == 0:
+            participacion_txt = "Primera vez"
+        elif veces == 1:
+            participacion_txt = "Segunda vez"
+        else:
+            participacion_txt = "Tercera vez"
+
         ws.append([
             index,
             plan.numero,
@@ -159,6 +174,7 @@ def exportar_excel(modeladmin, request, queryset):
 
             getattr(resumen, 'estado_reconsideracion', '') if resumen else '',
             getattr(resumen, 'motivo_reconsideracion', '') if resumen else '',
+            participacion_txt,
         ])
 
 
@@ -394,7 +410,7 @@ class ResumenPlanInline(admin.StackedInline):
         return True
     
     def ver_mapa(self, obj):
-        if obj and obj.coordenada_norte and obj.coordenada_este and obj.huso:
+        if obj and obj.coordenada_norte is not None and obj.coordenada_este is not None and obj.huso:
 
             try:
                 norte = float(str(obj.coordenada_norte).replace(",", "."))
@@ -605,7 +621,7 @@ class PracticaPotreroInline(admin.StackedInline):
 # ======================
 class EvaluacionTecnicaInline(admin.StackedInline):
     model = EvaluacionTecnica
-    extra = 0
+    extra = 1
     readonly_fields = ('puntaje', 'ver_desglose')
 
     def ver_desglose(self, obj):
@@ -626,7 +642,7 @@ class PlanAdmin(admin.ModelAdmin):
 
     inlines = [ResumenPlanInline, PotreroInline, EvaluacionTecnicaInline]
 
-    exclude = ('participacion_agricultor',)
+    
 
     readonly_fields = ('boton_constancia',)
 
@@ -672,6 +688,11 @@ class PlanAdmin(admin.ModelAdmin):
         'comuna',
         'nombre_operador',
     )
+
+    def participacion_display(self, obj):
+        return obj.get_participacion_agricultor_display()
+
+    participacion_display.short_description = "Participación"
 
     # 🧰 FILTROS (NUEVO)
     list_filter = (
@@ -811,6 +832,11 @@ class PlanAdmin(admin.ModelAdmin):
     incentivo_total.short_description = "Incentivo $"
 
     
+    def save_model(self, request, obj, form, change):
+        if not obj.usuario:
+            obj.usuario = request.user
+        super().save_model(request, obj, form, change)
+
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
 

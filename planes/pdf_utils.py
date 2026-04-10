@@ -73,7 +73,17 @@ def generar_pdf_constancia(planes):
     y -= 15
 
     p.setFont("Helvetica", 10)
-    p.drawString(50, y, "saman")  # luego lo conectamos al usuario real
+    usuario = planes[0].usuario if planes else None
+
+    if usuario:
+        nombre_completo = f"{usuario.first_name} {usuario.last_name}".strip()
+        
+        if nombre_completo:
+            p.drawString(50, y, nombre_completo)
+        else:
+            p.drawString(50, y, usuario.username)
+    else:
+        p.drawString(50, y, "-")
     y -= 15
 
     # Cantidad de planes

@@ -1,0 +1,114 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<style>
+    .login-container {
+        max-width: 500px;
+        margin: 60px auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .login-container h1 {
+        font-size: 20px;
+        line-height: 1.4;
+        margin-bottom: 25px;
+        color: #2c3e50;
+    }
+
+    .login-container img {
+        max-height: 60px;
+        margin: 10px;
+    }
+
+    form {
+        margin-top: 25px;
+        text-align: left;
+    }
+
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: 500;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+    }
+
+    button {
+        margin-top: 25px;
+        width: 100%;
+        padding: 10px;
+        background: #3b6c85;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+    #header, #nav-sidebar, .breadcrumbs {
+    display: none !important;
+    }
+
+    #content {
+        margin-left: 0 !important;
+    }
+
+    body {
+        background: #eef2f5;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    h1#site-name, .login #content h1 {
+        display: none;
+    }
+    #content-main h1 {
+        display: none !important;
+    }
+    body.login h1 {
+        display: none !important;
+    }
+    .breadcrumbs + h1 {
+        display: none !important;
+    }
+</style>
+
+<div class="login-container">
+
+    <div>
+        <img src="{% static 'images/seremi.png' %}">
+        <img src="{% static 'images/gore.png' %}">
+    </div>
+
+    <h1>
+        Programa Apoyo al Mejoramiento de la Fertilidad<br>
+        en Sistemas Agropecuarios Productivos<br>
+        Región de Los Ríos
+    </h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label>Nombre de usuario:</label>
+        {{ form.username }}
+
+        <label>Contraseña:</label>
+        {{ form.password }}
+
+        <button type="submit">Iniciar sesión</button>
+    </form>
+
+</div>
+{% endblock %}

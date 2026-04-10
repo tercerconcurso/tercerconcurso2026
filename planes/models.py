@@ -1,5 +1,6 @@
 from django.db import models
 from pyproj import Transformer
+from django.contrib.auth.models import User
 
 class Plan(models.Model):
     numero = models.AutoField(primary_key=True)
@@ -12,6 +13,8 @@ class Plan(models.Model):
     nombre_operador = models.CharField(max_length=200)
     rut_operador = models.CharField(max_length=20)
     correo_operador = models.EmailField()
+    
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
 
@@ -80,6 +83,13 @@ class Plan(models.Model):
             self.sector = self.sector.strip().upper()
 
         super().save(*args, **kwargs)
+
+         # 🔥 FORZAR recálculo automático
+        from .models import EvaluacionTecnica
+
+        ev = EvaluacionTecnica.objects.filter(plan=self).first()
+        if ev:
+            ev.save()
     
 class ResumenPlan(models.Model):
     plan = models.OneToOneField(Plan, on_delete=models.CASCADE)
@@ -719,9 +729,12 @@ class EvaluacionTecnica(models.Model):
 
         from planes.models import HistorialPostulacion
 
-        rut = self.plan.rut_agricultor
+        rut = str(self.plan.rut_agricultor).replace(".", "").strip()
 
-        historial = HistorialPostulacion.objects.filter(rut=rut).first()
+        print("RUT PLAN:", rut)
+        print("HISTORIAL:", HistorialPostulacion.objects.filter(rut__iexact=rut).first())
+
+        historial = HistorialPostulacion.objects.filter(rut__iexact=rut).first()
 
         veces = historial.veces if historial else 0
 

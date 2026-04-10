@@ -1,22 +1,29 @@
-import pandas as pd
-from planes.models import HistorialPostulacion
-
-
 def cargar_excel(ruta):
+    import pandas as pd
+    from planes.models import HistorialPostulacion
 
     df = pd.read_excel(ruta)
 
-    # 🔥 limpiar columnas
+    # 🔥 normalizar columnas
     df.columns = df.columns.str.strip().str.lower()
 
-    # 🔥 agrupar por rut y contar participaciones
+    # 🔥 verificación clave
+    print(df.columns)
+
+    # 🔥 agrupar correctamente
     conteo = df.groupby('rut').size()
 
-    for rut, veces in conteo.items():
+    # 🔥 limpiar tabla antes (opcional pero recomendable)
+    HistorialPostulacion.objects.all().delete()
 
-        HistorialPostulacion.objects.update_or_create(
-            rut=str(rut).strip(),
-            defaults={'veces': int(veces)}
+    registros = [
+        HistorialPostulacion(
+            rut=str(rut).replace(".", "").strip(),
+            veces=int(veces)
         )
+        for rut, veces in conteo.items()
+    ]
 
-    print("Carga completa")
+    HistorialPostulacion.objects.bulk_create(registros)
+
+    print("Carga completa (rápida)")

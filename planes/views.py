@@ -11,6 +11,13 @@ def home(request):
 def ver_constancia_pdf(request, plan_id):
     plan = get_object_or_404(Plan, pk=plan_id)
 
-    pdf = generar_pdf_constancia([plan])  # tu función recibe lista
+    from datetime import datetime
 
-    return HttpResponse(pdf, content_type='application/pdf')
+    fecha = plan.fecha_ingreso.date()
+
+    planes = Plan.objects.filter(
+        rut_operador=plan.rut_operador.strip(),
+        fecha_ingreso__date=fecha
+    ).order_by('numero')
+
+    return generar_pdf_constancia(list(planes))
