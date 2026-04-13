@@ -326,23 +326,45 @@ def dashboard_view(request):
 
     total = sum([r.incentivo_total or 0 for r in resumenes])
 
+    def obtener_estado_final(resumen):
+
+        if not resumen:
+            return ''
+
+        if resumen.estado_reconsideracion == 'rechazado':
+            return 'rechazado'
+
+        if resumen.estado_reconsideracion == 'aprobado':
+            return 'aprobado'
+
+        if resumen.estado_administrativo == 'rechazado':
+            return 'rechazado'
+
+        if resumen.estado_tecnico == 'RECHAZADO':
+            return 'rechazado'
+
+        if (
+            resumen.estado_administrativo == 'aprobado' and
+            resumen.estado_tecnico == 'APROBADO'
+        ):
+            return 'aprobado'
+
+        return 'pendiente'
+
     aprobados = sum([
         r.incentivo_total or 0
         for r in resumenes
-        if r.estado_tecnico == 'aprobado'
-    ])
-
-    rechazados_tec = sum([
-        r.incentivo_total or 0
-        for r in resumenes
-        if r.estado_tecnico == 'rechazado'
+        if obtener_estado_final(r) == 'aprobado'
     ])
 
     rechazados_admin = sum([
         r.incentivo_total or 0
         for r in resumenes
-        if r.estado_administrativo == 'rechazado'
+        if obtener_estado_final(r) == 'rechazado'
     ])
+
+    rechazados_tec = 0
+    
 
     # AGRUPACIONES
     por_comuna = Plan.objects.exclude(comuna__isnull=True).exclude(comuna='').values('comuna').annotate(
