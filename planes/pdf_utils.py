@@ -5,6 +5,8 @@ import os
 from django.conf import settings
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 def generar_pdf_constancia(planes):
     response = HttpResponse(content_type='application/pdf')
@@ -90,7 +92,10 @@ def generar_pdf_constancia(planes):
     p.setFont("Helvetica-Bold", 10)
     p.drawString(50, y, f"Cantidad de planes: {len(planes)}")
     y -= 30
-        
+
+    styles = getSampleStyleSheet()
+    styleN = styles["Normal"]
+
     # Tabla profesional
     data = [
         ["N°", "Agricultor", "RUT", "Comuna", "Sector", "Concurso"]
@@ -99,14 +104,14 @@ def generar_pdf_constancia(planes):
     for plan in planes:
         data.append([
             str(plan.numero),
-            plan.nombre_agricultor,
+            Paragraph(plan.nombre_agricultor, styleN),
             plan.rut_agricultor,
-            plan.comuna,
-            plan.sector,
-            plan.concurso
+            Paragraph(plan.comuna, styleN),
+            Paragraph(plan.sector, styleN),
+            Paragraph(plan.concurso, styleN),
         ])
 
-    tabla = Table(data, colWidths=[40, 120, 90, 80, 90, 80])
+    tabla = Table(data, colWidths=[40, 150, 90, 80, 100, 80])
 
     tabla.setStyle(TableStyle([
         ('GRID', (0,0), (-1,-1), 1, colors.black),
