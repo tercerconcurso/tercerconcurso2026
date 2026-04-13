@@ -719,6 +719,7 @@ class PlanAdmin(admin.ModelAdmin):
     # 🧰 FILTROS (NUEVO)
     list_filter = (
         'comuna',
+        'concurso',
         'nombre_operador',
         'estado_administrativo',
         'evaluaciontecnica__estado_tecnico',

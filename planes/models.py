@@ -13,7 +13,7 @@ class Plan(models.Model):
     nombre_operador = models.CharField(max_length=200)
     rut_operador = models.CharField(max_length=20)
     correo_operador = models.EmailField()
-    
+
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
@@ -73,11 +73,22 @@ class Plan(models.Model):
         if self.comuna:
             self.comuna = self.comuna.strip().upper()
 
+        if self.nombre_agricultor:
+            self.nombre_agricultor = self.nombre_agricultor.strip().upper()
+
         if self.nombre_operador:
             self.nombre_operador = self.nombre_operador.strip().upper()
-
         if self.concurso:
-            self.concurso = self.concurso.strip().upper()
+            texto = self.concurso.strip().lower()
+
+            if "peque" in texto:
+                self.concurso = "PEQUEÑOS"
+            elif "media" in texto:
+                self.concurso = "MEDIANOS"
+            elif "comun" in texto:
+                self.concurso = "COMUNIDADES"
+            else:
+                self.concurso = texto.upper()
 
         if self.sector:
             self.sector = self.sector.strip().upper()
