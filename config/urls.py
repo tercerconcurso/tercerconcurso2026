@@ -17,12 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from planes.views import home
-from planes.views import reset_secuencia
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
-    path('planes/', include('planes.urls')),
-    path('reset-secuencia/', reset_secuencia),
+    path('planes/', include('planes.urls')), 
 ]
 
