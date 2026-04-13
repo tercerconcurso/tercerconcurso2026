@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from planes.views import home
+from planes.views import agenda_view
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
-    path('planes/', include('planes.urls')), 
+    path('planes/', include('planes.urls')),
+    path('agenda/', agenda_view), 
 ]
 

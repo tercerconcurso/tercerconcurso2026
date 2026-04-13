@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from .models import Plan
 from .pdf_utils import generar_pdf_constancia
+from django.core.mail import send_mail
 
 
 def home(request):
@@ -23,4 +24,88 @@ def ver_constancia_pdf(request, plan_id):
     return generar_pdf_constancia(list(planes))
 
 
+from django.shortcuts import render, redirect
+from .models import Agenda
 
+def agenda_view(request):
+
+    # ======================
+    # POST (guardar reserva)
+    # ======================
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        correo = request.POST.get('correo')
+        fecha = request.POST.get('fecha')
+        hora = request.POST.get('hora')
+
+        # validar campos
+        if not nombre or not correo or not fecha or not hora:
+            return redirect('/agenda/?error=campos')
+
+        # validar duplicado (bloque de 30 min)
+        existe = Agenda.objects.filter(fecha=fecha, hora=hora).exists()
+
+        if existe:
+            return redirect(f'/agenda/?error=ocupado&fecha={fecha}')
+
+        # guardar
+        Agenda.objects.create(
+            nombre=nombre,
+            correo=correo,
+            fecha=fecha,
+            hora=hora
+        )
+
+        return redirect(f'/agenda/?success=1&fecha={fecha}')
+
+    # ======================
+    # GET (mostrar página)
+    # ======================
+    error = request.GET.get('error')
+    success = request.GET.get('success')
+    fecha_filtro = request.GET.get('fecha')
+
+    mensaje_error = None
+    mensaje_success = None
+
+    if error == 'campos':
+        mensaje_error = 'Debe completar todos los campos'
+    elif error == 'ocupado':
+        mensaje_error = 'Ese horario ya está reservado'
+
+    if success:
+        mensaje_success = 'Reserva realizada correctamente'
+
+    # ======================
+    # Horas ocupadas por fecha
+    # ======================
+    if fecha_filtro:
+        ocupadas = list(
+            Agenda.objects.filter(fecha=fecha_filtro)
+            .values_list('hora', flat=True)
+        )
+    else:
+        ocupadas = []
+
+    # ======================
+    # BLOQUES DE 30 MINUTOS
+    # ======================
+    horas = [
+        "09:00", "09:30",
+        "10:00", "10:30",
+        "11:00", "11:30",
+        "12:00", "12:30",
+        "15:00", "15:30",
+        "16:00", "16:30"
+    ]
+
+    # ======================
+    # RENDER
+    # ======================
+    return render(request, 'agenda.html', {
+        'error': mensaje_error,
+        'success': mensaje_success,
+        'ocupadas': ocupadas,
+        'horas': horas,
+        'fecha_filtro': fecha_filtro,
+    })

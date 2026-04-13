@@ -1085,3 +1085,10 @@ def get_admin_urls():
 
 original_get_urls = admin.site.get_urls
 admin.site.get_urls = get_admin_urls
+
+
+from .models import Agenda
+
+@admin.register(Agenda)
+class AgendaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'correo', 'fecha', 'hora', 'creado')

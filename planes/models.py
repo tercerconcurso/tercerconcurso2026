@@ -786,3 +786,15 @@ class HistorialPostulacion(models.Model):
 
     def __str__(self):
         return f"{self.rut} - {self.veces}"
+    
+
+class Agenda(models.Model):
+    nombre = models.CharField(max_length=200)
+    correo = models.EmailField()
+    fecha = models.DateField()
+    hora = models.CharField(max_length=10)
+
+    creado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre} - {self.fecha} {self.hora}"
