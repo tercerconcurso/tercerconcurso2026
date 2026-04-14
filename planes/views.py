@@ -93,7 +93,7 @@ def agenda_view(request):
 # except:
 #     pass
 
-        return redirect(f'/agenda/comprobante/?nombre={nombre}&fecha={fecha}&hora={hora}')
+        return redirect('/planes/comprobante/')
 
     # ======================
     # GET

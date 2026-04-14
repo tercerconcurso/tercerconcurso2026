@@ -6,5 +6,5 @@ from . import views
 urlpatterns = [
     path('constancia/<int:plan_id>/', ver_constancia_pdf, name='ver_constancia_pdf'),
     path('agenda/', agenda_view, name='agenda'),
-    path('agenda/comprobante/', views.comprobante_view, name='comprobante'),
+    path('comprobante/', views.comprobante_view, name='comprobante'),
 ]
