@@ -79,30 +79,28 @@ def agenda_view(request):
 
         fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 
-        # enviar correo
-        try:
-            send_mail(
-                'Confirmación de reserva',
-                f'''Hola {nombre},
+        # enviar correo (DESACTIVADO TEMPORALMENTE)
+        # try:
+        #     send_mail(
+        #         'Confirmación de reserva',
+        #         f'''Hola {nombre},
 
-        Tu hora ha sido agendada correctamente.
+        # Tu hora ha sido agendada correctamente.
 
-        📅 Fecha: {fecha_formateada}
-        ⏰ Hora: {hora}
+        # 📅 Fecha: {fecha_formateada}
+        # ⏰ Hora: {hora}
 
-        Si necesitas modificar o cancelar tu hora, por favor contáctanos.
+        # Si necesitas modificar o cancelar tu hora, por favor contáctanos.
 
-        Saludos,
-        Equipo Programa Fertilidad Los Ríos
-        ''',
-                'fertilidad.losrios@gmail.com',
-                [correo],
-                fail_silently=False,
-            )
-        except Exception as e:
-            print("Error enviando correo:", e)
-
-        return redirect(f'/agenda/?success=1&fecha={fecha}')
+        # Saludos,
+        # Equipo Programa Fertilidad Los Ríos
+        # ''',
+        #         'fertilidad.losrios@gmail.com',
+        #         [correo],
+        #         fail_silently=False,
+        #     )
+        # except Exception as e:
+        #     print("Error enviando correo:", e)
 
     # ======================
     # GET (mostrar página)
