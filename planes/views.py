@@ -1,8 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from .models import Plan
-from .pdf_utils import generar_pdf_constancia
 from django.core.mail import send_mail
+from datetime import datetime
+import threading
+
+from .models import Plan, Agenda
+from .pdf_utils import generar_pdf_constancia
 
 
 def home(request):
@@ -11,8 +14,6 @@ def home(request):
 
 def ver_constancia_pdf(request, plan_id):
     plan = get_object_or_404(Plan, pk=plan_id)
-
-    from datetime import datetime
 
     fecha = plan.fecha_ingreso.date()
 
@@ -23,17 +24,10 @@ def ver_constancia_pdf(request, plan_id):
 
     return generar_pdf_constancia(list(planes))
 
-from django.core.mail import send_mail
-from datetime import datetime
-from django.shortcuts import render, redirect
-from .models import Agenda
 
-
-import threading
-from django.core.mail import send_mail
-from datetime import datetime
-
-
+# ======================
+# ENVÍO DE CORREO ASYNC
+# ======================
 def enviar_correo_async(nombre, correo, fecha, hora):
     def tarea():
         try:
@@ -55,7 +49,7 @@ Equipo Programa Fertilidad Los Ríos
 ''',
                 'fertilidad.losrios@gmail.com',
                 [correo],
-                fail_silently=True,  # IMPORTANTE
+                fail_silently=True,
             )
         except Exception as e:
             print("Error correo:", e)
@@ -63,12 +57,11 @@ Equipo Programa Fertilidad Los Ríos
     threading.Thread(target=tarea).start()
 
 
-
+# ======================
+# AGENDA
+# ======================
 def agenda_view(request):
 
-    # ======================
-    # POST (guardar reserva)
-    # ======================
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         correo = request.POST.get('correo')
@@ -81,11 +74,10 @@ def agenda_view(request):
 
         # bloquear fines de semana
         fecha_obj = datetime.strptime(fecha, "%Y-%m-%d")
-
-        if fecha_obj.weekday() >= 5:  # 5 = sábado, 6 = domingo
+        if fecha_obj.weekday() >= 5:
             return redirect(f'/agenda/?error=findesemana&fecha={fecha}')
 
-        # validar rango horario permitido
+        # validar horario
         horas_permitidas = [
             "09:00", "09:30",
             "10:00", "10:30",
@@ -100,7 +92,6 @@ def agenda_view(request):
 
         # validar duplicado
         existe = Agenda.objects.filter(fecha=fecha, hora=hora).exists()
-
         if existe:
             return redirect(f'/agenda/?error=ocupado&fecha={fecha}')
 
@@ -111,35 +102,15 @@ def agenda_view(request):
             fecha=fecha,
             hora=hora
         )
+
+        # enviar correo en segundo plano
         enviar_correo_async(nombre, correo, fecha, hora)
-        
-        fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 
-        # enviar correo (DESACTIVADO TEMPORALMENTE)
-        # try:
-        #     send_mail(
-        #         'Confirmación de reserva',
-        #         f'''Hola {nombre},
-
-        # Tu hora ha sido agendada correctamente.
-
-        # 📅 Fecha: {fecha_formateada}
-        # ⏰ Hora: {hora}
-
-        # Si necesitas modificar o cancelar tu hora, por favor contáctanos.
-
-        # Saludos,
-        # Equipo Programa Fertilidad Los Ríos
-        # ''',
-        #         'fertilidad.losrios@gmail.com',
-        #         [correo],
-        #         fail_silently=False,
-        #     )
-        # except Exception as e:
-        #     print("Error enviando correo:", e)
+        # 🔴 ESTE ERA EL PROBLEMA (faltaba)
+        return redirect(f'/agenda/?success=1&fecha={fecha}')
 
     # ======================
-    # GET (mostrar página)
+    # GET
     # ======================
     error = request.GET.get('error')
     success = request.GET.get('success')
@@ -160,9 +131,7 @@ def agenda_view(request):
     if success:
         mensaje_success = 'Reserva realizada correctamente'
 
-    # ======================
-    # Horas ocupadas por fecha
-    # ======================
+    # horas ocupadas
     if fecha_filtro:
         ocupadas = list(
             Agenda.objects.filter(fecha=fecha_filtro)
@@ -171,9 +140,7 @@ def agenda_view(request):
     else:
         ocupadas = []
 
-    # ======================
-    # Bloques de 30 minutos
-    # ======================
+    # bloques
     horas = [
         "09:00", "09:30",
         "10:00", "10:30",
@@ -183,9 +150,6 @@ def agenda_view(request):
         "16:00", "16:30"
     ]
 
-    # ======================
-    # Render
-    # ======================
     return render(request, 'agenda.html', {
         'error': mensaje_error,
         'success': mensaje_success,
