@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprobante de Reserva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .dato {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .dato strong {
+            display: block;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .btn {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>✔ Reserva Confirmada</h2>
+
+    <div class="dato">
+        <strong>Nombre</strong>
+        {{ nombre }}
+    </div>
+
+    <div class="dato">
+        <strong>Fecha</strong>
+        {{ fecha }}
+    </div>
+
+    <div class="dato">
+        <strong>Hora</strong>
+        {{ hora }}
+    </div>
+
+    <a href="/agenda/" class="btn">Volver a agenda</a>
+</div>
+
+</body>
+</html>
