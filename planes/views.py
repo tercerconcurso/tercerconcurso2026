@@ -23,9 +23,11 @@ def ver_constancia_pdf(request, plan_id):
 
     return generar_pdf_constancia(list(planes))
 
-
+from django.core.mail import send_mail
+from datetime import datetime
 from django.shortcuts import render, redirect
 from .models import Agenda
+
 
 def agenda_view(request):
 
@@ -41,10 +43,8 @@ def agenda_view(request):
         # validar campos
         if not nombre or not correo or not fecha or not hora:
             return redirect('/agenda/?error=campos')
-        
-        # bloquear fines de semana
-        from datetime import datetime
 
+        # bloquear fines de semana
         fecha_obj = datetime.strptime(fecha, "%Y-%m-%d")
 
         if fecha_obj.weekday() >= 5:  # 5 = sábado, 6 = domingo
@@ -77,6 +77,27 @@ def agenda_view(request):
             hora=hora
         )
 
+        fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
+        # enviar correo
+        send_mail(
+            'Confirmación de reserva',
+            f'''Hola {nombre},
+
+        Tu hora ha sido agendada correctamente.
+
+        📅 Fecha: {fecha_formateada}
+        ⏰ Hora: {hora}
+
+        Si necesitas modificar o cancelar tu hora, por favor contáctanos.
+
+        Saludos,
+        Equipo Programa Fertilidad Los Ríos
+        ''',
+            'fertilidad.losrios@gmail.com',
+            [correo],
+            fail_silently=False,
+        )
+
         return redirect(f'/agenda/?success=1&fecha={fecha}')
 
     # ======================
@@ -95,6 +116,8 @@ def agenda_view(request):
         mensaje_error = 'Ese horario ya está reservado'
     elif error == 'horario':
         mensaje_error = 'Horario no permitido (solo entre 09:00 y 16:30)'
+    elif error == 'findesemana':
+        mensaje_error = 'No se permiten reservas en fines de semana'
 
     if success:
         mensaje_success = 'Reserva realizada correctamente'
