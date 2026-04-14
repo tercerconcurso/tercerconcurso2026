@@ -69,33 +69,31 @@ def agenda_view(request):
         )
 
         # enviar correo (estable)
-        try:
-            fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
+       # try:
+#     fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
+#
+#     mensaje = f'''Hola {nombre},
+#
+# Tu hora ha sido agendada correctamente.
+#
+# 📅 Fecha: {fecha_formateada}
+# ⏰ Hora: {hora}
+#
+# Saludos,
+# Equipo Programa Fertilidad Los Ríos
+# '''
+#
+#     send_mail(
+#         'Confirmación de reserva',
+#         mensaje,
+#         None,
+#         [correo],
+#         fail_silently=True,
+#     )
+# except:
+#     pass
 
-            mensaje = f'''Hola {nombre},
-
-Tu hora ha sido agendada correctamente.
-
-📅 Fecha: {fecha_formateada}
-⏰ Hora: {hora}
-
-Si necesitas modificar o cancelar tu hora, por favor contáctanos.
-
-Saludos,
-Equipo Programa Fertilidad Los Ríos
-'''
-
-            send_mail(
-                'Confirmación de reserva',
-                mensaje,
-                'None',
-                [correo],
-                fail_silently=True,
-            )
-        except:
-            pass
-
-        return redirect(f'/agenda/?success=1&fecha={fecha}')
+        return redirect(f'/agenda/comprobante/?nombre={nombre}&fecha={fecha}&hora={hora}')
 
     # ======================
     # GET
@@ -142,4 +140,15 @@ Equipo Programa Fertilidad Los Ríos
         'ocupadas': ocupadas,
         'horas': horas,
         'fecha_filtro': fecha_filtro,
+    })
+
+def comprobante_view(request):
+    nombre = request.session.get('nombre')
+    fecha = request.session.get('fecha')
+    hora = request.session.get('hora')
+
+    return render(request, 'comprobante.html', {
+        'nombre': nombre,
+        'fecha': fecha,
+        'hora': hora,
     })
