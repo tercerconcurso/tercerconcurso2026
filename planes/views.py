@@ -29,6 +29,41 @@ from django.shortcuts import render, redirect
 from .models import Agenda
 
 
+import threading
+from django.core.mail import send_mail
+from datetime import datetime
+
+
+def enviar_correo_async(nombre, correo, fecha, hora):
+    def tarea():
+        try:
+            fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
+
+            send_mail(
+                'Confirmación de reserva',
+                f'''Hola {nombre},
+
+Tu hora ha sido agendada correctamente.
+
+📅 Fecha: {fecha_formateada}
+⏰ Hora: {hora}
+
+Si necesitas modificar o cancelar tu hora, por favor contáctanos.
+
+Saludos,
+Equipo Programa Fertilidad Los Ríos
+''',
+                'fertilidad.losrios@gmail.com',
+                [correo],
+                fail_silently=True,  # IMPORTANTE
+            )
+        except Exception as e:
+            print("Error correo:", e)
+
+    threading.Thread(target=tarea).start()
+
+
+
 def agenda_view(request):
 
     # ======================
@@ -76,7 +111,8 @@ def agenda_view(request):
             fecha=fecha,
             hora=hora
         )
-
+        enviar_correo_async(nombre, correo, fecha, hora)
+        
         fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 
         # enviar correo (DESACTIVADO TEMPORALMENTE)
