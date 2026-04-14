@@ -47,9 +47,9 @@ Si necesitas modificar o cancelar tu hora, por favor contáctanos.
 Saludos,
 Equipo Programa Fertilidad Los Ríos
 ''',
-                'fertilidad.losrios@gmail.com',
+                None,
                 [correo],
-                fail_silently=False,
+                fail_silently=True,
             )
         except Exception as e:
             print("Error correo:", e)
