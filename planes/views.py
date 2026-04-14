@@ -49,7 +49,7 @@ Equipo Programa Fertilidad Los Ríos
 ''',
                 'fertilidad.losrios@gmail.com',
                 [correo],
-                fail_silently=True,
+                fail_silently=False,
             )
         except Exception as e:
             print("Error correo:", e)
