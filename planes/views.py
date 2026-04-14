@@ -1,9 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
 from django.core.mail import send_mail
 from datetime import datetime
-import threading
-
 from .models import Plan, Agenda
 from .pdf_utils import generar_pdf_constancia
 
@@ -23,21 +20,6 @@ def ver_constancia_pdf(request, plan_id):
     ).order_by('numero')
 
     return generar_pdf_constancia(list(planes))
-
-
-# ======================
-# ENVÍO DE CORREO ASYNC
-# ======================
-def # enviar_correo_async(nombre, correo, fecha, hora)
-    def tarea():
-       send_mail(
-            'TEST',
-            'correo de prueba',
-            None,
-            ['samantatropa@gmail.com'],  # tu correo
-            fail_silently=False,
-        )
-    threading.Thread(target=tarea).start()
 
 
 # ======================
@@ -86,10 +68,33 @@ def agenda_view(request):
             hora=hora
         )
 
-        # enviar correo en segundo plano
-        enviar_correo_async(nombre, correo, fecha, hora)
+        # enviar correo (estable)
+        try:
+            fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 
-        # 🔴 ESTE ERA EL PROBLEMA (faltaba)
+            mensaje = f'''Hola {nombre},
+
+Tu hora ha sido agendada correctamente.
+
+📅 Fecha: {fecha_formateada}
+⏰ Hora: {hora}
+
+Si necesitas modificar o cancelar tu hora, por favor contáctanos.
+
+Saludos,
+Equipo Programa Fertilidad Los Ríos
+'''
+
+            send_mail(
+                'Confirmación de reserva',
+                mensaje,
+                'fertilidad.losrios@gmail.com',
+                [correo],
+                fail_silently=True,
+            )
+        except:
+            pass
+
         return redirect(f'/agenda/?success=1&fecha={fecha}')
 
     # ======================
@@ -114,7 +119,6 @@ def agenda_view(request):
     if success:
         mensaje_success = 'Reserva realizada correctamente'
 
-    # horas ocupadas
     if fecha_filtro:
         ocupadas = list(
             Agenda.objects.filter(fecha=fecha_filtro)
@@ -123,7 +127,6 @@ def agenda_view(request):
     else:
         ocupadas = []
 
-    # bloques
     horas = [
         "09:00", "09:30",
         "10:00", "10:30",
