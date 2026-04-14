@@ -146,10 +146,19 @@ def agenda_view(request):
         'fecha_filtro': fecha_filtro,
     })
 
+from datetime import datetime
+from django.shortcuts import render
+
 def comprobante_view(request):
     nombre = request.session.get('nombre')
-    fecha = request.session.get('fecha')
+    fecha_raw = request.session.get('fecha')
     hora = request.session.get('hora')
+
+    # formatear fecha (sin romper si viene mal)
+    try:
+        fecha = datetime.strptime(fecha_raw, "%Y-%m-%d").strftime("%d-%m-%Y")
+    except:
+        fecha = fecha_raw
 
     return render(request, 'comprobante.html', {
         'nombre': nombre,
