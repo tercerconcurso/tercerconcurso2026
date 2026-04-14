@@ -28,32 +28,15 @@ def ver_constancia_pdf(request, plan_id):
 # ======================
 # ENVÍO DE CORREO ASYNC
 # ======================
-def enviar_correo_async(nombre, correo, fecha, hora):
+def # enviar_correo_async(nombre, correo, fecha, hora)
     def tarea():
-        try:
-            fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
-
-            send_mail(
-                'Confirmación de reserva',
-                f'''Hola {nombre},
-
-Tu hora ha sido agendada correctamente.
-
-📅 Fecha: {fecha_formateada}
-⏰ Hora: {hora}
-
-Si necesitas modificar o cancelar tu hora, por favor contáctanos.
-
-Saludos,
-Equipo Programa Fertilidad Los Ríos
-''',
-                None,
-                [correo],
-                fail_silently=True,
-            )
-        except Exception as e:
-            print("Error correo:", e)
-
+       send_mail(
+            'TEST',
+            'correo de prueba',
+            None,
+            ['samantatropa@gmail.com'],  # tu correo
+            fail_silently=False,
+        )
     threading.Thread(target=tarea).start()
 
 
