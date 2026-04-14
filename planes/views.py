@@ -41,8 +41,29 @@ def agenda_view(request):
         # validar campos
         if not nombre or not correo or not fecha or not hora:
             return redirect('/agenda/?error=campos')
+        
+        # bloquear fines de semana
+        from datetime import datetime
 
-        # validar duplicado (bloque de 30 min)
+        fecha_obj = datetime.strptime(fecha, "%Y-%m-%d")
+
+        if fecha_obj.weekday() >= 5:  # 5 = sábado, 6 = domingo
+            return redirect(f'/agenda/?error=findesemana&fecha={fecha}')
+
+        # validar rango horario permitido
+        horas_permitidas = [
+            "09:00", "09:30",
+            "10:00", "10:30",
+            "11:00", "11:30",
+            "12:00", "12:30",
+            "15:00", "15:30",
+            "16:00", "16:30"
+        ]
+
+        if hora not in horas_permitidas:
+            return redirect(f'/agenda/?error=horario&fecha={fecha}')
+
+        # validar duplicado
         existe = Agenda.objects.filter(fecha=fecha, hora=hora).exists()
 
         if existe:
@@ -72,6 +93,8 @@ def agenda_view(request):
         mensaje_error = 'Debe completar todos los campos'
     elif error == 'ocupado':
         mensaje_error = 'Ese horario ya está reservado'
+    elif error == 'horario':
+        mensaje_error = 'Horario no permitido (solo entre 09:00 y 16:30)'
 
     if success:
         mensaje_success = 'Reserva realizada correctamente'
@@ -88,7 +111,7 @@ def agenda_view(request):
         ocupadas = []
 
     # ======================
-    # BLOQUES DE 30 MINUTOS
+    # Bloques de 30 minutos
     # ======================
     horas = [
         "09:00", "09:30",
@@ -100,7 +123,7 @@ def agenda_view(request):
     ]
 
     # ======================
-    # RENDER
+    # Render
     # ======================
     return render(request, 'agenda.html', {
         'error': mensaje_error,

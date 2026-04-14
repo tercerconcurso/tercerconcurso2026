@@ -113,13 +113,18 @@
         {% csrf_token %}
 
         <label>Nombre</label>
-        <input type="text" name="nombre" required>
+        <input type="text" name="nombre" value="{{ request.GET.nombre }}" required>
 
         <label>Correo electrónico</label>
-        <input type="email" name="correo" required>
+        <input type="email" name="correo" value="{{ request.GET.correo }}" required>
 
         <label>Fecha de atención</label>
-        <input type="date" name="fecha" value="{{ fecha_filtro }}" onchange="window.location.href='?fecha=' + this.value" required>
+        <input type="date" name="fecha" value="{{ fecha_filtro }}"
+        onchange="
+            const nombre = document.querySelector('[name=nombre]').value;
+            const correo = document.querySelector('[name=correo]').value;
+            window.location.href='?fecha=' + this.value + '&nombre=' + nombre + '&correo=' + correo;
+        " required>
 
         <label>Hora disponible</label>
         <select name="hora" required>
@@ -132,7 +137,6 @@
                     <option value="{{ h }}">{{ h }}</option>
                 {% endif %}
             {% endfor %}
-
         </select>
 
         <button type="submit">Reservar Hora</button>
@@ -151,10 +155,3 @@
         SEREMI de Agricultura – Región de Los Ríos<br>
         Sistema de agendamiento oficial
     </div>
-
-</div>
-
-</div>
-
-</body>
-</html>

@@ -122,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-cl'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santiago'
 
 USE_I18N = True
 
@@ -148,3 +148,12 @@ import os
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # cambio para forzar deploy
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'TU_CORREO@gmail.com'
+EMAIL_HOST_PASSWORD = 'TU_PASSWORD_DE_APLICACION'
