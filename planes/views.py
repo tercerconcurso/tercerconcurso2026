@@ -88,7 +88,7 @@ Equipo Programa Fertilidad Los Ríos
             send_mail(
                 'Confirmación de reserva',
                 mensaje,
-                'fertilidad.losrios@gmail.com',
+                'None',
                 [correo],
                 fail_silently=True,
             )
