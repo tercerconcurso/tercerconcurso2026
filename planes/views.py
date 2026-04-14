@@ -67,7 +67,11 @@ def agenda_view(request):
             fecha=fecha,
             hora=hora
         )
+        request.session['nombre'] = nombre
+        request.session['fecha'] = fecha
+        request.session['hora'] = hora
 
+        return redirect('/planes/comprobante/')
         # enviar correo (estable)
        # try:
 #     fecha_formateada = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
