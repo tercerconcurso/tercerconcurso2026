@@ -129,10 +129,12 @@ def generar_pdf_constancia(planes):
     ["Firma Profesional que Entrega", "Firma Funcionario Receptor"]
     ], colWidths=[250, 250])
 
-    firma_tabla.setStyle([
+    from reportlab.platypus import TableStyle
+
+    firma_tabla.setStyle(TableStyle([
         ('ALIGN', (0,0), (-1,-1), 'CENTER'),
         ('TOPPADDING', (0,0), (-1,-1), 10),
-    ])
+    ]))
 
     elements.append(Spacer(1, 40))
     elements.append(firma_tabla)
