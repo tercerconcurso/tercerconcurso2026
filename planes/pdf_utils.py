@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.conf import settings
 import os
 from datetime import datetime
+from reportlab.platypus import Table, Paragraph, TableStyle
 
 
 def generar_pdf_constancia(planes):
