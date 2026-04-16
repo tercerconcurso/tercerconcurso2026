@@ -1,105 +1,74 @@
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-import os
-from django.conf import settings
-from reportlab.platypus import Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib import colors
-from reportlab.platypus import Paragraph
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
+from django.http import HttpResponse
+from django.conf import settings
+import os
+from datetime import datetime
+
 
 def generar_pdf_constancia(planes):
+
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="constancia.pdf"'
 
-    p = canvas.Canvas(response, pagesize=letter)
-
-    y = 750
-
-    # Rutas de los logos
-    logo_seremi = os.path.join(settings.BASE_DIR, 'planes', 'static', 'images', 'seremi.png')
-    logo_gore = os.path.join(settings.BASE_DIR, 'planes', 'static', 'images', 'gore.png')
-
-    # Logo izquierda
-    p.drawImage(logo_seremi, 50, 700, width=110, height=55, preserveAspectRatio=True)
-
-    # Logo derecha
-    p.drawImage(logo_gore, 440, 700, width=110, height=55, preserveAspectRatio=True)
-
-    y -= 80
-
-    # Título
-    p.setFont("Helvetica-Bold", 12)
-    p.setFont("Helvetica-Bold", 12)
-    p.drawCentredString(300, y, "CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO")
-    y -= 20
-
-    p.setFont("Helvetica", 10)
-    p.drawCentredString(300, y, "Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos")
-    y -= 15
-    p.drawCentredString(300, y, "Región de Los Ríos – Código BIP 40013271-0 – Tercer Concurso 2026")
-    y -= 30
-
-    from datetime import datetime
-
-    # Número de recepción (usamos el primero como referencia)
-    numero_recepcion = planes[0].numero if planes else ""
-
-    # Fecha y hora actual
-    fecha_hora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-
-    p.drawString(50, y, f"N° Recepción: {numero_recepcion}")
-    y -= 15
-    p.drawString(50, y, f"Fecha y hora: {fecha_hora}")
-    y -= 20
-
-    # Datos del operador
-    if planes:
-        operador = planes[0]
-
-        p.setFont("Helvetica-Bold", 10)
-        p.drawString(50, y, "Profesional que entrega:")
-        y -= 15
-
-        p.setFont("Helvetica", 10)
-        p.drawString(50, y, f"Nombre: {operador.nombre_operador}")
-        y -= 15
-        p.drawString(50, y, f"RUT: {operador.rut_operador}")
-        y -= 15
-        p.drawString(50, y, f"Correo: {operador.correo_operador}")
-        y -= 25
-
-    # Funcionario receptor
-    p.setFont("Helvetica-Bold", 10)
-    p.drawString(50, y, "Funcionario receptor:")
-    y -= 15
-
-    p.setFont("Helvetica", 10)
-    usuario = planes[0].usuario if planes else None
-
-    if usuario:
-        nombre_completo = f"{usuario.first_name} {usuario.last_name}".strip()
-        
-        if nombre_completo:
-            p.drawString(50, y, nombre_completo)
-        else:
-            p.drawString(50, y, usuario.username)
-    else:
-        p.drawString(50, y, "-")
-    y -= 15
-
-    # Cantidad de planes
-    p.setFont("Helvetica-Bold", 10)
-    p.drawString(50, y, f"Cantidad de planes: {len(planes)}")
-    y -= 30
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
 
     styles = getSampleStyleSheet()
     styleN = styles["Normal"]
 
-    # Tabla profesional
-    data = [
-        ["N°", "Agricultor", "RUT", "Comuna", "Sector", "Concurso"]
-    ]
+    # Logos
+    logo_seremi = os.path.join(settings.BASE_DIR, 'planes', 'static', 'images', 'seremi.png')
+    logo_gore = os.path.join(settings.BASE_DIR, 'planes', 'static', 'images', 'gore.png')
+
+    if os.path.exists(logo_seremi):
+        elements.append(Image(logo_seremi, width=100, height=50))
+    if os.path.exists(logo_gore):
+        elements.append(Image(logo_gore, width=100, height=50))
+
+    elements.append(Spacer(1, 10))
+
+    # Título
+    elements.append(Paragraph("<b>CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO</b>", styles['Title']))
+    elements.append(Paragraph("Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos", styleN))
+    elements.append(Paragraph("Región de Los Ríos – Código BIP 40013271-0 – Tercer Concurso 2026", styleN))
+
+    elements.append(Spacer(1, 15))
+
+    numero_recepcion = planes[0].numero if planes else ""
+    fecha_hora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    elements.append(Paragraph(f"N° Recepción: {numero_recepcion}", styleN))
+    elements.append(Paragraph(f"Fecha y hora: {fecha_hora}", styleN))
+
+    elements.append(Spacer(1, 10))
+
+    # Operador
+    if planes:
+        operador = planes[0]
+
+        elements.append(Paragraph("<b>Profesional que entrega:</b>", styleN))
+        elements.append(Paragraph(f"Nombre: {operador.nombre_operador}", styleN))
+        elements.append(Paragraph(f"RUT: {operador.rut_operador}", styleN))
+        elements.append(Paragraph(f"Correo: {operador.correo_operador}", styleN))
+
+    elements.append(Spacer(1, 10))
+
+    # Usuario
+    usuario = planes[0].usuario if planes else None
+    if usuario:
+        nombre_completo = f"{usuario.first_name} {usuario.last_name}".strip()
+        elements.append(Paragraph(f"Funcionario receptor: {nombre_completo or usuario.username}", styleN))
+
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph(f"<b>Cantidad de planes: {len(planes)}</b>", styleN))
+
+    elements.append(Spacer(1, 15))
+
+    # TABLA (CORREGIDA)
+    data = [["N°", "Agricultor", "RUT", "Comuna", "Sector", "Concurso"]]
 
     for plan in planes:
         data.append([
@@ -111,38 +80,28 @@ def generar_pdf_constancia(planes):
             Paragraph(plan.concurso, styleN),
         ])
 
-    tabla = Table(data, colWidths=[40, 150, 90, 80, 100, 80])
+    tabla = Table(data, colWidths=[30, 140, 80, 80, 90, 70])
 
     tabla.setStyle(TableStyle([
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
         ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
     ]))
 
-    # Dibujar tabla
-    tabla.wrapOn(p, 50, y)
-    tabla.drawOn(p, 50, y - (20 * len(data)))
+    elements.append(tabla)
+
+    elements.append(Spacer(1, 40))
+
     # Firmas
-    y = 150
+    elements.append(Paragraph("__________________________", styleN))
+    elements.append(Paragraph("Firma Profesional que Entrega", styleN))
 
-    # Línea izquierda
-    p.line(100, y, 250, y)
-    p.drawString(110, y - 15, "Firma Profesional que Entrega")
+    elements.append(Spacer(1, 20))
 
-    # Línea derecha
-    p.line(350, y, 500, y)
-    p.drawString(360, y - 15, "Firma Funcionario Receptor")
+    elements.append(Paragraph("__________________________", styleN))
+    elements.append(Paragraph("Firma Funcionario Receptor", styleN))
 
-    # Pie de página
-    p.setFont("Helvetica", 8)
-
-    y_footer = 30
-
-    p.drawString(50, y_footer, "Programa de Fertilidad de Suelos – SEREMI Agricultura Región de Los Ríos")
-    p.drawRightString(550, y_footer, "Página 1")
-
-    p.showPage()
-    p.save()
+    doc.build(elements)
 
     return response
