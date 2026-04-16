@@ -49,8 +49,8 @@ def generar_pdf_constancia(planes):
     tabla_logos = Table(logos, colWidths=[200, 100, 200])
     tabla_logos.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (2, 0), (2, 0), 6),  # baja un poco el logo GORE
     ]))
-
     elements.append(tabla_logos)
     elements.append(Spacer(1, 4))
 
@@ -67,8 +67,16 @@ def generar_pdf_constancia(planes):
     )
 
     elements.append(Paragraph("CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO", titulo_style))
-    elements.append(Paragraph("Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos", styleN))
-    elements.append(Paragraph("Región de Los Ríos - Código BIP 40013271-0 - Tercer Concurso 2026", styleN))
+    subtitulo_style = ParagraphStyle(
+        'SubtituloCustom',
+        fontName='Helvetica',
+        fontSize=10,
+        leading=12,
+        alignment=1,  # centrado
+    )
+
+    elements.append(Paragraph("Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos", subtitulo_style))
+    elements.append(Paragraph("Región de Los Ríos - Código BIP 40013271-0 - Tercer Concurso 2026", subtitulo_style))
 
     elements.append(Spacer(1, 15))
 
