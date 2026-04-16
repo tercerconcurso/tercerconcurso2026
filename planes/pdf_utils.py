@@ -50,9 +50,20 @@ def generar_pdf_constancia(planes):
     
 
     # Título
-    elements.append(Paragraph("<b>CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO</b>", styles['Title']))
+    from reportlab.lib.styles import ParagraphStyle
+
+    titulo_style = ParagraphStyle(
+        'TituloCustom',
+        fontName='Helvetica-Bold',
+        fontSize=13,
+        leading=16,
+        alignment=1,  # centrado
+        spaceAfter=6,
+    )
+
+    elements.append(Paragraph("CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO", titulo_style))
     elements.append(Paragraph("Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos", styleN))
-    elements.append(Paragraph("Región de Los Ríos – Código BIP 40013271-0 – Tercer Concurso 2026", styleN))
+    elements.append(Paragraph("Región de Los Ríos - Código BIP 40013271-0 - Tercer Concurso 2026", styleN))
 
     elements.append(Spacer(1, 15))
 
