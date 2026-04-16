@@ -46,7 +46,7 @@ def generar_pdf_constancia(planes):
 
     logos.append([img1, "", img2])
 
-    tabla_logos = Table(logos, colWidths=[200, 100, 200])
+    tabla_logos = Table(logos, colWidths=[120, 300, 80])
     tabla_logos.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('TOPPADDING', (2, 0), (2, 0), 6),  # baja un poco el logo GORE
