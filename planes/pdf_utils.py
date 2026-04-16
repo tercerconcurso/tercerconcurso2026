@@ -23,10 +23,26 @@ def generar_pdf_constancia(planes):
     logo_seremi = os.path.join(settings.BASE_DIR, 'planes', 'static', 'images', 'seremi.png')
     logo_gore = os.path.join(settings.BASE_DIR, 'planes', 'static', 'images', 'gore.png')
 
+    from reportlab.platypus import Table
+
+    logos = []
+
     if os.path.exists(logo_seremi):
-        elements.append(Image(logo_seremi, width=100, height=50))
+        img1 = Image(logo_seremi, width=90, height=45)
+    else:
+        img1 = ""
+
     if os.path.exists(logo_gore):
-        elements.append(Image(logo_gore, width=100, height=50))
+        img2 = Image(logo_gore, width=90, height=45)
+    else:
+        img2 = ""
+
+    logos.append([img1, "", img2])
+
+    tabla_logos = Table(logos, colWidths=[150, 200, 150])
+
+    elements.append(tabla_logos)
+    elements.append(Spacer(1, 10))
 
     elements.append(Spacer(1, 10))
 
