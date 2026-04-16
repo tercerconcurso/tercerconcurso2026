@@ -13,7 +13,14 @@ def generar_pdf_constancia(planes):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="constancia.pdf"'
 
-    doc = SimpleDocTemplate(response, pagesize=letter)
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=letter,
+        topMargin=20,
+        bottomMargin=30,
+        leftMargin=40,
+        rightMargin=40
+    )
     elements = []
 
     styles = getSampleStyleSheet()
@@ -45,7 +52,7 @@ def generar_pdf_constancia(planes):
     ]))
 
     elements.append(tabla_logos)
-    elements.append(Spacer(1, 8))
+    elements.append(Spacer(1, 4))
 
     # ======================
     # TÍTULO
