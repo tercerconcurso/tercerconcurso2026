@@ -28,23 +28,26 @@ def generar_pdf_constancia(planes):
     logos = []
 
     if os.path.exists(logo_seremi):
-        img1 = Image(logo_seremi, width=90, height=45)
+        img1 = Image(logo_seremi, width=100, height=50, kind='proportional')
     else:
         img1 = ""
 
     if os.path.exists(logo_gore):
-        img2 = Image(logo_gore, width=90, height=45)
+        img2 = Image(logo_gore, width=110, height=55, kind='proportional')
     else:
         img2 = ""
 
     logos.append([img1, "", img2])
 
-    tabla_logos = Table(logos, colWidths=[150, 200, 150])
+    tabla_logos = Table(logos, colWidths=[200, 100, 200])
+    tabla_logos.setStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ])
 
     elements.append(tabla_logos)
-    elements.append(Spacer(1, 10))
+    elements.append(Spacer(1, 8))
 
-    elements.append(Spacer(1, 10))
+    
 
     # Título
     elements.append(Paragraph("<b>CONSTANCIA DE RECEPCIÓN DE PLANES DE MANEJO</b>", styles['Title']))
@@ -110,14 +113,17 @@ def generar_pdf_constancia(planes):
     elements.append(Spacer(1, 40))
 
     # Firmas
-    elements.append(Paragraph("__________________________", styleN))
-    elements.append(Paragraph("Firma Profesional que Entrega", styleN))
+    firma_tabla = Table([
+    ["_______________________________", "_______________________________"]
+    ["Firma Profesional que Entrega", "Firma Funcionario Receptor"]
+    ], colWidths=[250, 250])
 
-    elements.append(Spacer(1, 20))
+    firma_tabla.setStyle([
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('TOPPADDING', (0,0), (-1,-1), 10),
+    ])
 
-    elements.append(Paragraph("__________________________", styleN))
-    elements.append(Paragraph("Firma Funcionario Receptor", styleN))
-
-    doc.build(elements)
+    elements.append(Spacer(1, 40))
+    elements.append(firma_tabla)
 
     return response
