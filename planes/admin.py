@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Count
 
 from .models import Plan, ResumenPlan, Potrero, PracticaPotrero, EvaluacionTecnica
+from .models import HistorialPostulacion
 from .pdf_utils import generar_pdf_constancia
 
 from openpyxl import Workbook
@@ -25,10 +26,9 @@ def exportar_excel(modeladmin, request, queryset):
     from openpyxl import Workbook
     from django.http import HttpResponse
 
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Resumen Planes"
-
+    wb = Workbook(write_only=True)
+    ws = wb.create_sheet(title="Resumen Planes")
+    
     headers = [
         'Ranking',
         'Numero',
@@ -109,20 +109,24 @@ def exportar_excel(modeladmin, request, queryset):
     # ======================
     # DATOS
     # ======================
-    ranking = list(modeladmin.get_queryset(request))
+    ranking = modeladmin.get_queryset(request).select_related(
+        'evaluaciontecnica'
+    ).prefetch_related(
+        'potreros',
+        'resumenplan'
+    )
+
+    historial_dict = {
+        h.rut.strip().lower(): h
+        for h in HistorialPostulacion.objects.all()
+    }
 
     for index, plan in enumerate(ranking, start=1):
-        resumen = ResumenPlan.objects.filter(plan=plan).first()
-
-        if not resumen:
-            print(f"⚠️ Plan {plan.numero} sin resumen")
-
-        print(f"Plan {plan.numero} - resumen:", resumen)
-
-        from planes.models import HistorialPostulacion
+        resumen = getattr(plan, 'resumenplan', None)
+    
 
         rut = str(plan.rut_agricultor).replace(".", "").strip()
-        historial = HistorialPostulacion.objects.filter(rut__iexact=rut).first()
+        historial = historial_dict.get(rut.lower())
 
         veces = historial.veces if historial else 0
 
