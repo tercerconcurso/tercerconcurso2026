@@ -978,6 +978,13 @@ class ResumenPlanAdmin(admin.ModelAdmin):
 @admin.register(Potrero)
 class PotreroAdmin(admin.ModelAdmin):
     inlines = [PracticaPotreroInline]
+    def response_change(self, request, obj):
+        from django.http import HttpResponseRedirect
+
+        if "_save" in request.POST:
+            return HttpResponseRedirect(f"/admin/planes/plan/{obj.plan.id}/change/")
+
+        return super().response_change(request, obj)
 
 
 admin.site.site_header = "Programa Apoyo al Mejoramiento de la Fertilidad en Sistemas Agropecuarios Productivos Región de Los Ríos"
