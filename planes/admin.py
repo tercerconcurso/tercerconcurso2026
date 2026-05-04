@@ -982,7 +982,7 @@ class PotreroAdmin(admin.ModelAdmin):
         from django.http import HttpResponseRedirect
 
         if "_save" in request.POST:
-            return HttpResponseRedirect(f"/admin/planes/plan/{obj.plan.id}/change/")
+            return HttpResponseRedirect(f"/admin/planes/plan/{obj.plan.numero}/change/")
 
         return super().response_change(request, obj)
 
