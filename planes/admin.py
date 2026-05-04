@@ -917,6 +917,7 @@ class ResumenPlanAdmin(admin.ModelAdmin):
         'motivo_rechazo_tecnico',
         'estado_reconsideracion',
         'motivo_reconsideracion',
+        'ir_al_plan',
     )
     fields = (
         'plan',
