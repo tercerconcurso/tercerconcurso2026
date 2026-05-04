@@ -725,7 +725,6 @@ class PlanAdmin(admin.ModelAdmin):
         'rut_agricultor',
         'comuna',
         'nombre_operador',
-        'ver_resumen'
     )
 
     def participacion_display(self, obj):
