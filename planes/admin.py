@@ -670,7 +670,7 @@ class PlanAdmin(admin.ModelAdmin):
 
     
 
-    readonly_fields = ('boton_constancia',)
+    readonly_fields = ('boton_constancia', 'ver_resumen')
 
     # 🔎 COLUMNAS
     list_display = (
@@ -686,6 +686,18 @@ class PlanAdmin(admin.ModelAdmin):
         'incentivo_total_display',
         'boton_constancia',
     )
+
+    def ver_resumen(self, obj):
+        from django.utils.html import format_html
+
+        if hasattr(obj, 'resumenplan'):
+            return format_html(
+                '<a href="/admin/planes/resumenplan/{}/change/">📊 Ver resumen</a>',
+                obj.resumenplan.pk
+            )
+        return "—"
+
+    ver_resumen.short_description = "Resumen"
 
     def incentivo_total(self, obj):
         from .models import ResumenPlan
@@ -713,6 +725,7 @@ class PlanAdmin(admin.ModelAdmin):
         'rut_agricultor',
         'comuna',
         'nombre_operador',
+        'ver_resumen'
     )
 
     def participacion_display(self, obj):
@@ -879,6 +892,13 @@ class PlanAdmin(admin.ModelAdmin):
 # ======================
 @admin.register(ResumenPlan)
 class ResumenPlanAdmin(admin.ModelAdmin):
+
+    search_fields = (
+        'plan__numero',
+        'plan__nombre_agricultor',
+        'plan__rut_agricultor',
+    )
+
     exclude = ('tipo_postulacion',)
     readonly_fields = (
         'ver_mapa',
@@ -900,6 +920,7 @@ class ResumenPlanAdmin(admin.ModelAdmin):
     )
     fields = (
         'plan',
+        'ir_al_plan', 
 
         'correo',
         'telefono',
@@ -968,6 +989,16 @@ class ResumenPlanAdmin(admin.ModelAdmin):
         return "Sin coordenadas"
 
     ver_mapa.short_description = "Mapa"
+
+    def ir_al_plan(self, obj):
+        from django.utils.html import format_html
+
+        return format_html(
+            '<a href="/admin/planes/plan/{}/change/">⬅ Volver al Plan</a>',
+            obj.plan.pk
+        )
+
+    ir_al_plan.short_description = "Volver"
    
 
     list_display = ('plan', 'nombres_potreros')
