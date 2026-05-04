@@ -1,6 +1,7 @@
 from django.db import models
 from pyproj import Transformer
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 class Plan(models.Model):
     numero = models.AutoField(primary_key=True)
