@@ -233,37 +233,17 @@ class ResumenPlan(models.Model):
     
     def save(self, *args, **kwargs):
 
-        # 🔹 obtener porcentaje desde el PRIMER potrero
-        potrero = self.plan.potreros.first()
+        potreros = self.plan.potreros.all()
 
-        if potrero and potrero.porcentaje_incentivo:
-            porcentaje = float(potrero.porcentaje_incentivo) / 100
-        else:
-            porcentaje = 0
+        # 🔹 Incentivo prácticas = suma de A ingresado manualmente
+        self.incentivo_practicas = sum(
+            p.incentivo_a or 0 for p in potreros
+        )
 
-        # 🔹 costo neto total
-        costo_neto_total = sum([
-            float(p.costo_neto or 0)
-            for p in self.plan.potreros.all()
-        ])
-
-        # 🔥 incentivo prácticas
-        incentivo_practicas = costo_neto_total * porcentaje
-
-        # 🔹 costos adicionales
-        costo_analisis = sum([
-            float(p.costo_analisis_suelo or 0)
-            for p in self.plan.potreros.all()
-        ])
-
-        costo_asesoria = sum([
-            float(p.asesoria_plan or 0)
-            for p in self.plan.potreros.all()
-        ])
-
-        # 🔥 guardar en BD
-        self.incentivo_practicas = incentivo_practicas
-        self.incentivo_total = float(incentivo_practicas) + float(costo_analisis) + float(costo_asesoria)
+        # 🔹 Incentivo total = suma de lo ingresado manualmente
+        self.incentivo_total = sum(
+            p.incentivo_solicitado or 0 for p in potreros
+        )
 
         super().save(*args, **kwargs)
 
@@ -400,6 +380,10 @@ class Potrero(models.Model):
     def save(self, *args, **kwargs):
 
         super().save(*args, **kwargs)
+
+         # 🔄 actualizar resumen automáticamente
+        if hasattr(self.plan, 'resumenplan'):
+            self.plan.resumenplan.save()
     
     
     def ver_mapa(self):
