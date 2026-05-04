@@ -20,8 +20,8 @@ class Plan(models.Model):
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
 
     ESTADO_ADMIN = [
-        ('aprobado', 'Aprobado'),
-        ('rechazado', 'Rechazado'),
+        ('aprobado', 'APROBADO'),
+        ('rechazado', 'RECHAZADO'),
     ]
 
     PARTICIPACION = [
@@ -375,7 +375,6 @@ class Potrero(models.Model):
         if errores:
             raise ValidationError(errores)
         
-    from decimal import Decimal
 
     def save(self, *args, **kwargs):
 
