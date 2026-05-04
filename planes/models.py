@@ -313,6 +313,7 @@ class Potrero(models.Model):
     )
 
     # Campos calculados (guardados, pero NO calculados aquí)
+    incentivo_a = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     incentivo_solicitado = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
 
     def __str__(self):
@@ -392,6 +393,33 @@ class Potrero(models.Model):
 
         if errores:
             raise ValidationError(errores)
+        
+    from decimal import Decimal
+
+    def save(self, *args, **kwargs):
+
+        # 🔥 Calcular incentivo base (A)
+        if self.costo_neto and self.porcentaje_incentivo:
+            incentivo_a = (Decimal(self.costo_neto) * Decimal(self.porcentaje_incentivo)) / Decimal(100)
+            incentivo_a = round(incentivo_a)
+        else:
+            incentivo_a = 0
+
+        self.incentivo_a = incentivo_a
+
+        # 🔥 Calcular total incentivo
+        total = incentivo_a
+
+        if self.costo_analisis_suelo:
+            total += Decimal(self.costo_analisis_suelo)
+
+        if self.asesoria_plan:
+            total += Decimal(self.asesoria_plan)
+
+        self.incentivo_solicitado = round(total)
+
+        super().save(*args, **kwargs)
+    
     
     def ver_mapa(self):
         if hasattr(self, 'latitud') and hasattr(self, 'longitud'):
