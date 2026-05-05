@@ -209,7 +209,9 @@ class ResumenPlan(models.Model):
 
     @property
     def estado_administrativo(self):
-        return self.plan.estado_administrativo
+        if not self.plan.estado_administrativo:
+            return "-"
+        return self.plan.estado_administrativo.upper()
 
 
     @property
