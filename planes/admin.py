@@ -17,7 +17,33 @@ from openpyxl.utils import get_column_letter
 import openpyxl
 import csv
 from pyproj import Transformer
+from django import forms
+from .models import Potrero
 
+class PotreroAdminForm(forms.ModelForm):
+    class Meta:
+        model = Potrero
+        fields = '__all__'
+        widgets = {
+            'utm_este': forms.TextInput(),
+            'utm_norte': forms.TextInput(),
+            'huso': forms.TextInput(),
+            'superficie': forms.TextInput(),
+            'costo_total': forms.TextInput(),
+            'costo_neto': forms.TextInput(),
+            'costo_analisis_suelo': forms.TextInput(),
+            'asesoria_plan': forms.TextInput(),
+        }
+class ResumenPlanAdminForm(forms.ModelForm):
+    class Meta:
+        model = ResumenPlan
+        fields = '__all__'
+        widgets = {
+            'coordenada_norte': forms.TextInput(),
+            'coordenada_este': forms.TextInput(),
+            'huso': forms.TextInput(),
+            'superficie_total': forms.TextInput(),
+        }
 
 # ======================
 # EXPORTAR EXCEL
@@ -426,6 +452,7 @@ def dashboard_view(request):
 # ======================
 class ResumenPlanInline(admin.StackedInline):
     model = ResumenPlan
+    form = ResumenPlanAdminForm
     extra = 0
     max_num = 1
     can_delete = False
@@ -483,6 +510,7 @@ class ResumenPlanInline(admin.StackedInline):
 class PotreroInline(admin.StackedInline):
     model = Potrero
     extra = 0
+    form = PotreroAdminForm
     readonly_fields = ('ir_a_potrero',)
 
     def ir_a_potrero(self, obj):
