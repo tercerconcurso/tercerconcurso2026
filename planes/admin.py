@@ -374,7 +374,7 @@ def dashboard_view(request):
             return 'rechazado'
 
         if (
-            resumen.estado_administrativo == 'aprobado' and
+            resumen.estado_administrativo == 'APROBADO' and
             resumen.estado_tecnico == 'APROBADO'
         ):
             return 'aprobado'
