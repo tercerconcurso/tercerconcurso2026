@@ -52,8 +52,9 @@ def exportar_excel(modeladmin, request, queryset):
     from openpyxl import Workbook
     from django.http import HttpResponse
 
-    wb = Workbook(write_only=True)
-    ws = wb.create_sheet(title="Resumen Planes")
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Resumen Planes"
     
     headers = [
         'Ranking',
