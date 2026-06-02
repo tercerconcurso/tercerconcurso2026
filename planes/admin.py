@@ -140,7 +140,7 @@ def exportar_excel(modeladmin, request, queryset):
         'evaluaciontecnica'
     ).prefetch_related(
         'potreros',
-        'resumenplan'
+        'potreros__practicas',
     )
 
     historial_dict = {
@@ -234,7 +234,7 @@ def exportar_excel(modeladmin, request, queryset):
     ws2.append(headers2)
 
     for plan in ranking:
-        resumen = ResumenPlan.objects.filter(plan=plan).first()
+        resumen = getattr(plan, 'resumenplan', None)
 
         for potrero in plan.potreros.all():
 
